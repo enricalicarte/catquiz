@@ -92,14 +92,14 @@ const REELS = {
     guio:[[1,'5 lletres, 6 intents','dalt'],[4.5,'Verd = lloc correcte','baix'],[8,'Groc = hi és, però no aquí','baix','zoom'],[12,'500 paraules','dalt'],[15.5,'Paraula del dia cada dia','baix'],[19,'La teva ratxa es guarda 🔥','dalt','zoom']] },
   penjat: { t:'Penjat 3D', e:'🪢', tipus:'PARAULES', c:'#7CE800', hook:'El penjat.', sub:'Peça a peça',
     guio:[[1,'12 categories','dalt'],[4.5,'Cada error, una peça','baix','zoom'],[8,'8 errors i… penjat','dalt'],[11.5,'Pista: una lletra per 2 errors','baix'],[15,'548 paraules en català','dalt'],[19,'Quina ratxa faràs?','baix','zoom']] },
-  catala: { t:'Com es diu en català?', e:'🗣️', tipus:'PARAULES', c:'#FF3E9A', hook:'Com es diu en català?', sub:'220 castellanismes',
+  catala: { t:'Com es diu en català?', e:'🗣️', tipus:'PARAULES', c:'#FF3E9A', hook:'Com es diu en català?', sub:'393 castellanismes',
     guio:[[1,'Un castellanisme, tres opcions','dalt'],[5,'12 segons per ronda','baix'],[9,'Ratxa de 3 = punts dobles','dalt','zoom'],[14,'Tot en català, tot en 3D','baix'],[19,'Quantes en saps?','dalt','zoom']] },
   intrus: { t:"L'intrús", e:'🕵️', tipus:'PARAULES', c:'#33E0FF', hook:'Quin és l\'intrús?', sub:'Tres van juntes',
-    guio:[[1,'12 categories barrejades','dalt'],[5,'Toca la que sobra','baix'],[9,'Cada segon que et sobra, suma','dalt','zoom'],[14,'10 rondes','baix'],[19,'Ratxa ×3 = punts dobles','dalt','zoom']] },
+    guio:[[1,'18 categories barrejades','dalt'],[5,'Toca la que sobra','baix'],[9,'Cada segon que et sobra, suma','dalt','zoom'],[14,'10 rondes','baix'],[19,'Ratxa ×3 = punts dobles','dalt','zoom']] },
   accents: { t:'Accents!', e:'✍️', tipus:'PARAULES', c:'#FF8C1A', hook:'Obert o tancat?', sub:'Tria la forma correcta',
-    guio:[[1,'Una paraula, tres grafies','dalt'],[5,'10 segons','baix'],[9,'Només una és correcta','dalt','zoom'],[14,'116 paraules traïdores','baix'],[19,'Te\'n sortiries?','dalt','zoom']] },
+    guio:[[1,'Una paraula, tres grafies','dalt'],[5,'10 segons','baix'],[9,'Només una és correcta','dalt','zoom'],[14,'240 paraules traïdores','baix'],[19,'Te\'n sortiries?','dalt','zoom']] },
   perdudes: { t:'Lletres perdudes', e:'🧩', tipus:'PARAULES', c:'#7CE800', hook:'Falten lletres!', sub:'Completa la paraula',
-    guio:[[1,'Escriu les que falten','dalt'],[5,'La groga és la següent','baix'],[9,'Tres errors i es revela','dalt','zoom'],[14,'548 paraules per categories','baix'],[19,'20 segons per ronda','dalt','zoom']] },
+    guio:[[1,'Escriu les que falten','dalt'],[5,'La groga és la següent','baix'],[9,'Tres errors i es revela','dalt','zoom'],[14,'818 paraules per categories','baix'],[19,'20 segons per ronda','dalt','zoom']] },
   sopa: { t:'Sopa de lletres', e:'🍲', tipus:'PARAULES', c:'#33E0FF', hook:'Sopa de lletres', sub:'En 3D i en català',
     guio:[[1,'6 paraules amagades','dalt'],[5,'Arrossega per marcar','baix'],[9,'Horitzontal, vertical i diagonal','dalt','zoom'],[14,'150 segons','baix'],[19,'Les trobaries totes?','dalt','zoom']] },
   anagrama: { t:'Anagrama', e:'🔀', tipus:'PARAULES', c:'#9B5CFF', hook:'Lletres barrejades.', sub:'Contrarellotge',
@@ -161,7 +161,8 @@ async function gravaReel(ids){
     const [pista] = stream.getVideoTracks();
     if (window.CropTarget && pista.cropTo) { const ct = await CropTarget.fromElement(escenari); await pista.cropTo(ct); } // retalla al rectangle 9:16
     else r.textContent = 'Aquest navegador no retalla la captura: el vídeo inclourà tota la pestanya (fes la finestra ben alta i estreta).';
-  } catch (e) { r.textContent = 'No s\'ha pogut capturar la pestanya: ' + e.message; document.getElementById('inici').hidden = false; return; }
+  } catch (e) { // sense captura (cancel·lada o no disponible): reprodueix el reel igualment, sense gravar
+    r.textContent = 'No s\'ha pogut gravar (' + (e.message || e.name) + '). Reprodueixo el reel sense gravar; per gravar, obre demo.html a Chrome d\'escriptori.'; document.getElementById('grava').checked = false; await espera(1800); bucle(ids); return; }
   if (!stream.getAudioTracks().length) r.textContent = 'Sense àudio: marca «Compartir àudio de la pestanya» al diàleg de captura.';
   const mime = ['video/mp4;codecs=avc1.42E01E,mp4a.40.2', 'video/mp4', 'video/webm;codecs=vp9,opus', 'video/webm'].find(m => MediaRecorder.isTypeSupported(m));
   const rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 8e6 }), trossos = []; rec.ondataavailable = e => { if (e.data.size) trossos.push(e.data); };
@@ -172,7 +173,9 @@ async function gravaReel(ids){
   const a = document.createElement('a'); a.className = 'baixa'; a.href = URL.createObjectURL(blob); a.download = `catquiz-reel-${ids.join('-')}.${ext}`; a.textContent = `⬇ Descarrega el reel (.${ext}, ${(blob.size/1048576).toFixed(1)} MB)`;
   r.innerHTML = ''; r.appendChild(a); document.getElementById('inici').hidden = false;
 }
-const arrenca = ids => { document.getElementById('inici').hidden = true; if (document.getElementById('grava').checked) gravaReel(ids); else bucle(ids); };
+const potGravar = !!(navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia && window.MediaRecorder);
+const arrenca = ids => { document.getElementById('inici').hidden = true; const g = document.getElementById('grava'); if (g && g.checked && potGravar) gravaReel(ids); else bucle(ids); };
+if (!potGravar) { for (const l of document.querySelectorAll('label')) if (l.querySelector('#grava')) { l.innerHTML = '📱 En aquest navegador no es pot gravar la pestanya. Reprodueix el reel i grava la pantalla amb el mòbil, o obre demo.html a Chrome d\'escriptori.'; l.style.color = '#DDE6FF'; } }
 const botons = document.getElementById('botons');
 for (const [id, r] of Object.entries(REELS)) { const b = document.createElement('button'); b.textContent = `${r.e} ${r.quiz ? 'Quiz · ' : ''}${r.t}`; if (r.quiz) { b.style.background = 'linear-gradient(180deg,#C79BFF,#9B5CFF)'; b.style.boxShadow = '0 7px 0 #5A2BB0'; } b.onclick = () => arrenca([id]); botons.appendChild(b); }
 const tots = document.createElement('button'); tots.textContent = '▶ Tots seguits'; tots.style.background = '#FFD600'; tots.style.color = '#1D2B64';
