@@ -3,139 +3,276 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Xerinola · Generador de vídeos quiz</title>
+<title>CatQuiz · Generador de vídeos quiz</title>
 <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Fredoka:wght@600;700&display=swap" rel="stylesheet">
 <style>
   *{box-sizing:border-box;margin:0}
   html,body{height:100%;background:#000;overflow:hidden;font-family:'Fredoka',sans-serif}
-  #v{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);aspect-ratio:9/16;height:100vh;max-width:100vw;overflow:hidden;background:var(--a)}
+  #v{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);aspect-ratio:9/16;height:100vh;max-width:100vw;overflow:hidden;background:#222}
   @media (max-aspect-ratio:9/16){#v{height:auto;width:100vw}}
-  /* Fons de raigs */
-  #raigs{position:absolute;left:50%;top:50%;width:260%;aspect-ratio:1;transform:translate(-50%,-50%) rotate(0deg);background:repeating-conic-gradient(var(--a) 0 12.857deg,var(--b) 12.857deg 25.714deg);animation:gira 90s linear infinite}
-  @keyframes gira{to{transform:translate(-50%,-50%) rotate(360deg)}}
-  .t{font-family:'Lilita One',sans-serif;text-transform:uppercase;color:#fff;-webkit-text-stroke:2.2px #2A1F4A;paint-order:stroke fill;text-shadow:0 4px 0 #2A1F4A,0 7px 0 rgba(0,0,0,.25);text-align:center;line-height:1.05}
-  #logo{position:absolute;top:2.5%;left:4%;font-size:min(3vh,4.5vw);background:#fff;border-radius:999px;padding:.4em .8em;font-family:'Lilita One',sans-serif;color:#2A1F4A;transform:rotate(-6deg);opacity:.95}
-  #logo:empty{display:none}
-  #pregunta{position:absolute;top:13%;left:6%;right:6%;font-size:min(5.6vh,8.4vw)}
-  #zona{position:absolute;left:8%;right:8%;top:32%;display:flex;flex-direction:column;gap:2.2vh;align-items:stretch}
-  .pill{position:relative;height:min(7vh,10.5vw);background:#fff;border-radius:999px;display:grid;place-items:center;font-family:'Lilita One',sans-serif;font-size:min(3.9vh,5.8vw);color:#2A1F4A;box-shadow:0 6px 0 rgba(0,0,0,.18);transition:transform .25s,opacity .25s;letter-spacing:.01em}
-  .pill .lletra{position:absolute;left:1.2%;top:8%;height:84%;aspect-ratio:1;border-radius:50%;background:var(--b);color:#fff;display:grid;place-items:center;font-size:.85em;-webkit-text-stroke:1px #2A1F4A;paint-order:stroke fill}
-  .pill.buida{color:transparent}
-  .pill.ok{background:#7CE800}
-  .pill.no{opacity:.55}
-  .pill.pop{animation:pop .4s cubic-bezier(.2,1.6,.4,1)}
-  @keyframes pop{from{transform:scale(.6)}60%{transform:scale(1.06)}to{transform:scale(1)}}
-  .badge{position:absolute;right:-1.5%;top:-38%;width:min(5.6vh,8.4vw);aspect-ratio:1;border-radius:50%;display:grid;place-items:center;font-size:.6em;color:#fff;border:3px solid #fff;box-shadow:0 4px 0 rgba(0,0,0,.25);animation:pop .35s cubic-bezier(.2,1.6,.4,1)}
-  .badge.x{background:#D1252B} .badge.v{background:#2FAF3A}
-  #barra{position:absolute;left:8%;right:8%;top:47%;height:min(3.4vh,5vw);background:#fff;border-radius:999px;padding:4px;box-shadow:0 5px 0 rgba(0,0,0,.18)}
-  #barra i{display:block;height:100%;border-radius:999px;background:#7CE800;width:100%;transform-origin:left}
-  #num{position:absolute;left:0;right:0;top:53%;font-size:min(3vh,4.5vw)}
-  #card{position:absolute;inset:0;display:grid;place-items:center;padding:8%;background:var(--c);z-index:5;overflow:hidden}
-  #card[hidden]{display:none}
-  #card .hex{position:absolute;width:60%;aspect-ratio:1;background:rgba(255,255,255,.08);clip-path:polygon(25% 5%,75% 5%,100% 50%,75% 95%,25% 95%,0 50%);animation:sura 6s ease-in-out infinite}
-  @keyframes sura{50%{transform:translateY(-4%) rotate(8deg)}}
-  #card .t{font-size:min(6vh,9vw);position:relative;animation:pop .5s cubic-bezier(.2,1.5,.4,1)}
-  .cor{position:absolute;bottom:-12%;font-size:min(6vh,9vw);animation:puja 3s linear forwards}
-  @keyframes puja{to{transform:translateY(-120vh) rotate(20deg);opacity:0}}
-  #menu{position:absolute;inset:0;z-index:9;display:grid;place-items:center;background:rgba(42,31,74,.9);text-align:center;padding:8%;color:#fff}
+  canvas{width:100%;height:100%;display:block}
+  #menu{position:absolute;inset:0;z-index:9;display:grid;place-items:center;background:rgba(42,31,74,.92);text-align:center;padding:6%;color:#fff}
   #menu[hidden]{display:none}
-  #menu button,#menu select,#menu input{font:inherit;font-weight:700;font-size:min(2.6vh,4vw);border:0;border-radius:999px;padding:.6em 1.2em;margin:.3em;cursor:pointer;background:#fff;color:#2A1F4A}
+  #menu h2{font-family:'Lilita One',sans-serif;font-size:min(4vh,6vw);margin-bottom:.6em}
+  #menu button,#menu select,#menu input{font:inherit;font-weight:700;font-size:min(2.4vh,3.8vw);border:0;border-radius:999px;padding:.55em 1.1em;margin:.25em;cursor:pointer;background:#fff;color:#2A1F4A}
+  #menu label{font-size:min(2.4vh,3.8vw);display:inline-block;margin:.4em}
   #menu button.go{background:#FF3E9A;color:#fff;font-size:min(3.4vh,5vw)}
-  #menu small{display:block;margin-top:1em;color:#DDE6FF;line-height:1.4}
+  #menu a.baixa{display:inline-block;background:#7CE800;color:#2A1F4A;font-weight:700;font-size:min(3vh,4.6vw);padding:.6em 1.4em;border-radius:999px;text-decoration:none;margin:.5em}
+  #menu small{display:block;margin-top:1em;color:#DDE6FF;line-height:1.4;font-size:min(2vh,3.2vw)}
+  #rec{position:absolute;top:2%;right:3%;z-index:8;background:#D1252B;color:#fff;font-weight:700;font-size:min(2.2vh,3.4vw);padding:.3em .8em;border-radius:999px;display:none;animation:parpelleja 1s infinite}
+  @keyframes parpelleja{50%{opacity:.4}}
 </style>
 </head>
 <body>
 <div id="v">
-  <div id="raigs"></div>
-  <div id="logo"></div>
-  <div class="t" id="pregunta"></div>
-  <div id="zona"></div>
-  <div id="barra"><i id="bar"></i></div>
-  <div class="t" id="num"></div>
-  <div id="card" hidden></div>
+  <canvas id="c" width="1080" height="1920"></canvas>
+  <div id="rec">● REC</div>
   <div id="menu"><div>
-    <h2 class="t" style="font-size:min(4vh,6vw);margin-bottom:.6em">Generador de vídeos quiz</h2>
+    <h2>Generador de vídeos quiz</h2>
     <div><select id="mode"><option value="catala">Com diries en català?</option><option value="accents">Com s'escriu?</option><option value="intrus">Quin és l'intrús?</option><option value="perdudes">Quina paraula és?</option></select>
     <select id="pal"><option value="0">Lila / salmó</option><option value="1">Blau marí / blau</option><option value="2">Marró / beix</option><option value="3">Verd / llima</option><option value="4">Aleatori</option></select></div>
-    <div><input id="n" type="number" min="3" max="20" value="10" style="width:5em"> preguntes · <input id="seg" type="number" min="3" max="15" value="7" style="width:4em"> s · <input id="logotxt" placeholder="@usuari (opcional)" style="width:11em"></div>
-    <button class="go" id="go">▶ Genera i comença</button>
-    <small>Grava només el rectangle vertical. Cada execució tria preguntes noves a l'atzar. També per URL: <b>?mode=catala&amp;n=10&amp;seg=7&amp;pal=0&amp;auto</b></small>
+    <div><input id="n" type="number" min="3" max="20" value="10" style="width:4.5em"> preguntes · <input id="seg" type="number" min="3" max="15" value="7" style="width:4em"> s · <input id="logotxt" placeholder="@usuari (opcional)" style="width:10em"></div>
+    <label><input type="checkbox" id="grava" checked> Grava i descarrega el vídeo (1080×1920, amb so)</label>
+    <div style="margin-top:.6em;background:rgba(255,255,255,.1);border-radius:18px;padding:.6em">
+      <div>🎙️ Locució: <select id="tts"><option value="cap">Sense veu</option><option value="navegador">Veu del navegador (només prova, no es grava)</option><option value="eleven">ElevenLabs (es grava)</option><option value="google">Google Cloud TTS (es grava)</option></select></div>
+      <div id="tts-cfg" style="display:none"><input id="clau" type="password" placeholder="Clau API" style="width:14em"> <input id="veu" list="veus" placeholder="ID de veu / nom" style="width:11em"><datalist id="veus"></datalist> <button id="btn-veus" type="button" style="font-size:.8em">Llista veus</button> <input id="vel" type="number" step="0.05" min="0.7" max="1.4" value="1.05" style="width:4.5em" title="velocitat"></div>
+      <div id="tts-info" style="font-size:min(2vh,3.2vw);color:#DDE6FF;margin-top:.3em"></div>
+    </div>
+    <div style="margin-top:.5em;background:rgba(255,255,255,.1);border-radius:18px;padding:.6em">
+      🎵 Música de fons: <select id="musica-tipus"><option value="cap">Sense música</option><option value="quiz">Procedural: quiz (alegre)</option><option value="suspens">Procedural: suspens</option><option value="fitxer">Fitxer propi</option></select> <input id="musica" type="file" accept="audio/*" style="font-size:min(2vh,3.2vw);width:13em;display:none"> volum <input id="vol" type="range" min="0" max="1" step="0.05" value="0.35" style="width:7em;vertical-align:middle">
+      <div id="musica-info" style="font-size:min(2vh,3.2vw);color:#DDE6FF;margin-top:.3em">La música procedural es genera amb osciladors (sense fitxers ni drets): cada vídeo té una melodia diferent. Baixa de volum quan parla la veu i s'apaga al final.</div>
+    </div>
+    <div><button class="go" id="go">▶ Genera i comença</button></div>
+    <div id="resultat"></div>
+    <small>Deixa la pestanya visible mentre es genera (dura el que dura el vídeo). Chrome i Edge descarreguen MP4; Firefox descarrega WebM. També per URL: <b>?mode=catala&amp;n=10&amp;seg=7&amp;pal=0&amp;auto</b></small>
   </div></div>
 </div>
 <script>
 const DADES = {"cast": [["carajillo", "cigaló"], ["andami", "bastida"], ["follón", "merder"], ["assafata", "hostessa"], ["àngul", "angle"], ["bocadillo", "entrepà"], ["buzón", "bústia"], ["cubo", "galleda"], ["grifo", "aixeta"], ["sello", "segell"], ["tenedor", "forquilla"], ["servilleta", "tovalló"], ["toalla", "tovallola"], ["almohada", "coixí"], ["cepillo", "raspall"], ["taladro", "trepant"], ["tornillo", "cargol"], ["clavo", "clau"], ["bombilla", "bombeta"], ["enchufe", "endoll"], ["acera", "vorera"], ["barandilla", "barana"], ["basura", "escombraries"], ["pasillo", "passadís"], ["bolsa", "bossa"], ["gafas", "ulleres"], ["pendientes", "arracades"], ["zapatillas", "sabatilles"], ["botón", "botó"], ["abrigo", "abric"], ["monedero", "moneder"], ["peluquería", "perruqueria"], ["juguete", "joguina"], ["columpio", "gronxador"], ["globo", "globus"], ["cumpleaños", "aniversari"], ["regalo", "regal"], ["mesa", "taula"], ["silla", "cadira"], ["ventana", "finestra"], ["techo", "sostre"], ["suelo", "terra"], ["pared", "paret"], ["fregadero", "aigüera"], ["lavadora", "rentadora"], ["plancha", "planxa"], ["percha", "penjador"], ["cajón", "calaix"], ["alfombra", "catifa"], ["espejo", "mirall"], ["reloj", "rellotge"], ["llave", "clau"], ["lápiz", "llapis"], ["mochila", "motxilla"], ["pizarra", "pissarra"], ["tiza", "guix"], ["recreo", "esbarjo"], ["deberes", "deures"], ["calle", "carrer"], ["semáforo", "semàfor"], ["atasco", "embús"], ["gasolinera", "benzinera"], ["coche", "cotxe"], ["rueda", "roda"], ["freno", "fre"], ["cinturón", "cinturó"], ["barco", "vaixell"], ["avión", "avió"], ["billete", "bitllet"], ["tienda", "botiga"], ["panadería", "fleca"], ["carnicería", "carnisseria"], ["pescadería", "peixateria"], ["fresa", "maduixa"], ["sandía", "síndria"], ["melocotón", "préssec"], ["albaricoque", "albercoc"], ["cereza", "cirera"], ["ciruela", "pruna"], ["uva", "raïm"], ["plátano", "plàtan"], ["piña", "pinya"], ["zanahoria", "pastanaga"], ["calabacín", "carbassó"], ["berenjena", "albergínia"], ["pimiento", "pebrot"], ["cebolla", "ceba"], ["ajo", "all"], ["lechuga", "enciam"], ["judías", "mongetes"], ["garbanzos", "cigrons"], ["lentejas", "llenties"], ["queso", "formatge"], ["jamón", "pernil"], ["mantequilla", "mantega"], ["azúcar", "sucre"], ["pastel", "pastís"], ["helado", "gelat"], ["galleta", "galeta"], ["desayuno", "esmorzar"], ["merienda", "berenar"], ["cena", "sopar"], ["vaso", "got"], ["taza", "tassa"], ["botella", "ampolla"], ["cuchillo", "ganivet"], ["cuchara", "cullera"], ["sartén", "paella"], ["bañera", "banyera"], ["ducha", "dutxa"], ["jabón", "sabó"], ["peine", "pinta"], ["espalda", "esquena"], ["rodilla", "genoll"], ["tobillo", "turmell"], ["codo", "colze"], ["muñeca", "canell"], ["hombro", "espatlla"], ["cuello", "coll"], ["mejilla", "galta"], ["barbilla", "barbeta"], ["ceja", "cella"], ["pestaña", "pestanya"], ["uña", "ungla"], ["ombligo", "melic"], ["perro", "gos"], ["caballo", "cavall"], ["oveja", "ovella"], ["cerdo", "porc"], ["conejo", "conill"], ["ardilla", "esquirol"], ["rana", "granota"], ["mariposa", "papallona"], ["araña", "aranya"], ["hormiga", "formiga"], ["abeja", "abella"], ["pájaro", "ocell"], ["paloma", "colom"], ["golondrina", "oreneta"], ["búho", "mussol"], ["lluvia", "pluja"], ["niebla", "boira"], ["rayo", "llamp"], ["trueno", "tro"], ["verano", "estiu"], ["otoño", "tardor"], ["invierno", "hivern"], ["lunes", "dilluns"], ["martes", "dimarts"], ["miércoles", "dimecres"], ["jueves", "dijous"], ["viernes", "divendres"], ["sábado", "dissabte"], ["domingo", "diumenge"], ["rojo", "vermell"], ["amarillo", "groc"], ["azul", "blau"], ["naranja", "taronja"], ["morado", "lila"], ["marrón", "marró"], ["negro", "negre"], ["blanco", "blanc"], ["después", "després"], ["entonces", "llavors"], ["vale", "d'acord"], ["también", "també"], ["todavía", "encara"], ["mientras", "mentre"], ["cerca", "a prop"], ["lejos", "lluny"], ["despacio", "a poc a poc"], ["deprisa", "de pressa"], ["tonto", "ximple"], ["apretar", "prémer"], ["disfrutar", "gaudir"], ["tamany", "mida"], ["olvidar", "oblidar"], ["lio", "embolic"], ["sombrero", "barret"], ["apoyar", "donar suport"], ["enterar-se", "assabentar-se"], ["xiste", "acudit"], ["xuxeria", "llaminadura"], ["tarta", "pastís"], ["cuento", "conte"], ["bicho", "bestiola"], ["mueble", "moble"], ["ojalá", "tant de bo"], ["sillón", "butaca"], ["camarero", "cambrer"], ["tonteria", "ximpleria"], ["recado", "encàrrec"], ["susto", "ensurt"], ["retraso", "retard"], ["resbalar", "relliscar"], ["colilla", "burilla"], ["cansado", "cansat"], ["aburrido", "avorrit"], ["peligro", "perill"], ["vacaciones", "vacances"], ["verdadero", "veritable"], ["ahorrar", "estalviar"], ["alquiler", "lloguer"], ["sueldo", "sou"], ["jefe", "cap"], ["tarea", "tasca"], ["plazo", "termini"], ["resumen", "resum"], ["respuesta", "resposta"], ["ayuda", "ajuda"], ["gracias", "gràcies"], ["por favor", "si us plau"], ["adiós", "adeu"], ["buenas noches", "bona nit"], ["hasta luego", "fins després"], ["cumbre", "cim"], ["sendero", "corriol"], ["arroyo", "rierol"], ["charco", "bassal"], ["acantilado", "penya-segat"], ["palomitas", "crispetes"], ["casi", "gairebé"], ["online", "en línia"], ["sillín", "selló"], ["ensajar", "assajar"], ["llamatiu", "cridaner"], ["quiebra", "fallida"], ["traïcionar", "trair"], ["pàrraf", "paràgraf"], ["bueno", "bé"], ["pues", "doncs"], ["a lo mejor", "potser"], ["tenir que", "haver de"], ["algo", "alguna cosa"], ["vivenda", "habitatge"], ["guapo", "bonic"], ["manguera", "mànega"], ["calentar", "escalfar"], ["alcansar", "assolir"], ["aterrizar", "aterrar"], ["bolso", "bossa"], ["cadera", "maluc"], ["carinyo", "estimació"], ["despedir", "acomiadar"], ["pulpo", "polp"], ["xupar", "xuclar"]], "accents": ["cançó", "camí", "cafè", "avió", "balcó", "carbó", "cartró", "castellà", "català", "nació", "ració", "passió", "missió", "setè", "sisè", "cinquè", "desè", "això", "allò", "però", "perquè", "després", "també", "ningú", "algú", "cadascú", "vostè", "mercè", "fàcil", "difícil", "ràpid", "àgil", "útil", "dèbil", "hàbil", "mòbil", "tèxtil", "tòxic", "història", "memòria", "glòria", "victòria", "fúria", "òpera", "època", "líquid", "màquina", "pàgina", "música", "física", "química", "lògica", "màgic", "tràgic", "òrgan", "òscar", "ànec", "àngel", "àrab", "àrea", "àlbum", "àtom", "èxit", "èlit", "ídol", "ínfim", "últim", "única", "pròxim", "pròleg", "còpia", "còlera", "dòlar", "bòbila", "sofà", "mamà", "papà", "divà", "paràsit", "paràlisi", "préssec", "préstec", "pèsol", "pèl", "pèrdua", "pèndol", "cérvol", "règim", "règia", "ciència", "paciència", "consciència", "experiència", "essència", "presència", "fàbrica", "tràfic", "espès", "francès", "anglès", "japonès", "xinès", "pagès", "món", "raó", "lliçó", "vermelló", "òliba", "òrbita", "túnel", "cúpula", "fúnebre", "rúbrica", "púrpura", "ràdio", "dàlia"], "cats": {"Animals": ["ELEFANT", "GIRAFA", "CONILL", "ESQUIROL", "TORTUGA", "PAPALLONA", "LLANGARDAIX", "GRANOTA", "CARGOL", "BALENA", "DOFI", "GUINEU", "SENGLAR", "MUSSOL", "ORENETA", "LLEO", "TIGRE", "CAVALL", "OVELLA", "CABRA", "GALLINA", "ANEC", "CIGNE", "PINGUI", "FOCA", "TAURO", "POLP", "MEDUSA", "ARANYA", "ABELLA", "VESPA", "MOSQUIT", "FORMIGA", "CUC", "RATOLI", "ERICO", "TEIXO", "LLOP", "OS", "CERVOL", "CAMELL", "ZEBRA", "HIPOPOTAM", "RINOCERONT", "MICO", "GORILA", "COCODRIL", "SERP", "CANGUR", "KOALA"], "Menjar": ["ESCALIVADA", "CALCOTS", "BOTIFARRA", "PANELLETS", "CREMA", "ESQUEIXADA", "SAMFAINA", "FIDEUA", "COCA", "TORRO", "ALBERGINIA", "CARXOFA", "MANDARINA", "PRESSEC", "ESPINACS", "PA", "TOMAQUET", "FORMATGE", "PERNIL", "TRUITA", "ARROS", "PAELLA", "CANELONS", "ESCUDELLA", "MONGETES", "CIGRONS", "LLENTIES", "ENSALADA", "MADUIXA", "CIRERA", "SINDRIA", "MELO", "PLATAN", "POMA", "PERA", "RAIM", "TARONJA", "LLIMONA", "KIWI", "PINYA", "XOCOLATA", "GALETA", "PASTIS", "GELAT", "MEL", "IOGURT", "LLET", "SUC", "CAFE", "ENTREPA", "CROQUETES", "SOPA", "MACARRONS", "PEBROT", "CEBA", "ALL", "PATATA", "PASTANAGA", "CARBASSO", "ENCIAM"], "Ciutats": ["BARCELONA", "GIRONA", "LLEIDA", "TARRAGONA", "FIGUERES", "MANRESA", "VIC", "REUS", "TORTOSA", "SABADELL", "TERRASSA", "MATARO", "BADALONA", "OLOT", "SITGES", "IGUALADA", "VILANOVA", "GRANOLLERS", "BLANES", "ROSES", "CADAQUES", "BANYOLES", "RIPOLL", "BERGA", "SOLSONA", "CERVERA", "TARREGA", "BALAGUER", "VALLS", "CAMBRILS", "SALOU", "AMPOSTA", "PALAMOS", "LLORET", "CALELLA", "VILAFRANCA", "MARTORELL", "CASTELLDEFELS", "VILADECANS", "RUBI", "SANT", "CUGAT", "MOLLERUSSA", "PUIGCERDA", "TREMP", "VIELHA"], "Esports": ["NATACIO", "ATLETISME", "ESCALADA", "CICLISME", "HANDBOL", "BASQUET", "VOLEIBOL", "ESGRIMA", "PATINATGE", "GIMNASTICA", "PIRAGUISME", "HOQUEI", "TENNIS", "SURF", "JUDO", "FUTBOL", "RUGBI", "GOLF", "BOXA", "KARATE", "TAEKWONDO", "ESQUI", "SNOWBOARD", "SENDERISME", "REM", "VELA", "WATERPOLO", "SALTS", "MARATO", "TRIATLO", "CURSA", "BADMINTON", "PADEL", "SQUASH", "ESCACS", "DARDS", "BILLAR", "BITLLES", "PETANCA", "SKATE", "PARKOUR", "IOGA", "ARQUERIA", "HIPICA", "POLO"], "Escola": ["PISSARRA", "MOTXILLA", "ESTOIG", "LLAPIS", "GOMA", "REGLE", "LLIBRETA", "CARPETA", "TISORES", "ESBARJO", "MESTRE", "EXAMEN", "DICTAT", "BIBLIOTECA", "MENJADOR", "CADIRA", "PUPITRE", "GUIX", "RETOLADOR", "BOLIGRAF", "COLA", "CALCULADORA", "COMPAS", "AGENDA", "DEURES", "MATEMATIQUES", "CIENCIES", "HISTORIA", "GEOGRAFIA", "ANGLES", "MUSICA", "PLASTICA", "GIMNAS", "PATI", "CLASSE", "ALUMNE", "DIRECTOR", "TIMBRE", "VACANCES", "PROJECTE", "MAPA", "GLOBUS", "DICCIONARI", "ATLES"], "Natura": ["MUNTANYA", "RIU", "LLAC", "MAR", "BOSC", "PRAT", "DESERT", "VOLCA", "GLACERA", "CASCADA", "COVA", "PENYASEGAT", "ILLA", "PLATJA", "DUNA", "ROCA", "SORRA", "PEDRA", "ARBRE", "FLOR", "FULLA", "ARREL", "BRANCA", "MOLSA", "BOLET", "FALGUERA", "PI", "ROURE", "ALZINA", "FAIG", "AVET", "OLIVERA", "XIPRER", "LLUNA", "SOL", "ESTEL", "NUVOL", "PLUJA", "NEU", "BOIRA", "VENT", "LLAMP", "TRO", "TEMPESTA", "ARC", "DE", "SANT", "MARTI", "ALBA", "CAPVESPRE", "MAREA", "ONA"], "Casa": ["CUINA", "MENJADOR", "DORMITORI", "LAVABO", "BALCO", "TERRAT", "GARATGE", "ESCALA", "PORTA", "FINESTRA", "PARET", "SOSTRE", "TERRA", "SOFA", "TAULA", "CADIRA", "LLIT", "ARMARI", "PRESTATGE", "COIXI", "MANTA", "LLENCOL", "CORTINA", "CATIFA", "LAMPADA", "ESPELMA", "NEVERA", "FORN", "MICROONES", "RENTADORA", "ASPIRADORA", "ESCOMBRA", "GALLEDA", "FREGONA", "PLAT", "GOT", "FORQUILLA", "CULLERA", "GANIVET", "OLLA", "PAELLA", "TETERA", "AIXETA", "DUTXA", "BANYERA", "MIRALL", "TOVALLOLA", "CLAU"], "Cos": ["CAP", "CARA", "FRONT", "ULL", "CELLA", "PESTANYA", "NAS", "BOCA", "LLAVI", "DENT", "LLENGUA", "ORELLA", "GALTA", "BARBETA", "COLL", "ESPATLLA", "BRAC", "COLZE", "CANELL", "MA", "DIT", "UNGLA", "PIT", "ESQUENA", "CINTURA", "MALUC", "CAMA", "GENOLL", "TURMELL", "PEU", "TALO", "COR", "PULMO", "ESTOMAC", "FETGE", "RONYO", "CERVELL", "OS", "MUSCUL", "SANG", "PELL", "CABELL", "VENA", "NERVI", "COSTELLA", "COLUMNA", "PANXA", "MELIC"], "Professions": ["METGE", "INFERMERA", "MESTRE", "BOMBER", "POLICIA", "CUINER", "CAMBRER", "FUSTER", "PALETA", "LAMPISTA", "ELECTRICISTA", "MECANIC", "PILOT", "ASTRONAUTA", "CIENTIFIC", "ENGINYER", "ARQUITECTE", "ADVOCAT", "JUTGE", "PERIODISTA", "ESCRIPTOR", "PINTOR", "ESCULTOR", "MUSIC", "CANTANT", "ACTOR", "BALLARI", "FOTOGRAF", "DISSENYADOR", "PROGRAMADOR", "PAGES", "PESCADOR", "RAMADER", "FORNER", "CARNISSER", "PEIXATER", "FLORISTA", "PERRUQUER", "DENTISTA", "VETERINARI", "FARMACEUTIC", "TAXISTA", "CONDUCTOR", "CARTER", "JARDINER"], "Música": ["GUITARRA", "PIANO", "VIOLI", "VIOLONCEL", "CONTRABAIX", "FLAUTA", "CLARINET", "SAXOFON", "TROMPETA", "TROMBO", "TUBA", "BATERIA", "TIMBAL", "TAMBOR", "PANDERETA", "MARAQUES", "XILOFON", "ARPA", "ACORDIO", "HARMONICA", "GRALLA", "TENORA", "FLABIOL", "SARDANA", "HAVANERA", "CANCO", "CONCERT", "ORQUESTRA", "COR", "DIRECTOR", "SOLISTA", "NOTA", "PENTAGRAMA", "CLAU", "RITME", "MELODIA", "HARMONIA", "COMPAS", "PARTITURA", "MICROFON", "ALTAVEU"], "Transports": ["COTXE", "MOTO", "BICICLETA", "PATINET", "AUTOBUS", "TRAMVIA", "METRO", "TREN", "AVE", "TAXI", "CAMIO", "FURGONETA", "TRACTOR", "AMBULANCIA", "AVIO", "HELICOPTER", "GLOBUS", "COET", "VAIXELL", "BARCA", "VELER", "CANOA", "SUBMARI", "FERRI", "TELEFERIC", "FUNICULAR", "CREMALLERA", "MONOPATI", "CAVALL", "CARRO", "TRINEU"], "Festes": ["NADAL", "CAP", "DANY", "REIS", "CARNESTOLTES", "PASQUA", "SANT", "JORDI", "JOAN", "DIADA", "MERCE", "TOTS", "SANTS", "CASTANYADA", "TIO", "CAGANER", "PESSEBRE", "CAVALCADA", "CASTELLERS", "GEGANTS", "CAPGROSSOS", "CORREFOC", "DIABLES", "DRAC", "SARDANA", "HAVANERES", "REVETLLA", "PETARDS", "FOGUERA", "COCA", "MONA", "PANELLETS", "TORRONS", "NEULES", "ROSA", "LLIBRE", "FANALET", "CERCAVILA"]}};
 const PAL = [['#5B4A8A','#E8877B','#F07C8A'],['#223F8C','#4A8FE2','#3E7BE0'],['#6B4A2E','#E9D9BD','#C98A4B'],['#1E7A3A','#9BE24A','#7CE800']];
-const q = new URLSearchParams(location.search);
-const $ = id => document.getElementById(id);
+const q = new URLSearchParams(location.search), $ = id => document.getElementById(id);
 const espera = ms => new Promise(r => setTimeout(r, ms));
 const barreja = a => a.slice().sort(() => Math.random() - .5), tria = a => a[Math.floor(Math.random() * a.length)];
-const sense = w => w.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
-let actx; function so(tipus){ try { actx ||= new (window.AudioContext || window.webkitAudioContext)(); const o = actx.createOscillator(), g = actx.createGain(); o.connect(g); g.connect(actx.destination);
-  const cfg = { tic:[900,900,.04,'sine'], ok:[660,1320,.25,'square'], no:[220,110,.35,'square'], pop:[500,800,.1,'triangle'] }[tipus]; o.type = cfg[3]; const t = actx.currentTime;
-  o.frequency.setValueAtTime(cfg[0], t); o.frequency.exponentialRampToValueAtTime(cfg[1], t + cfg[2]); g.gain.setValueAtTime(.09, t); g.gain.exponentialRampToValueAtTime(.001, t + cfg[2]); o.start(t); o.stop(t + cfg[2]); } catch (e) {} }
+const sense = w => w.normalize('NFD').replace(/[\u0300-\u036f]/g, ''), cap = s => s.charAt(0).toUpperCase() + s.slice(1);
 
-// ---- Generadors de preguntes: { titol, mostra:[{txt, lletra?}], resposta:[{txt, ok}] } ----
+// ===== Motor d'àudio 100% procedural (Web Audio) =====
+// Bus mestre amb guany i compressor → SFX per oscil·ladors amb variació aleatòria de to → música per seqüenciador amb lookahead
+let actx, mix; // 'mix' és el bus mestre: va a l'altaveu i, si gravem, també al vídeo
+const AUDIO = { ctx: null, master: null, mus: null, soroll: null, actiu: false };
+function audioInit(){ if (AUDIO.ctx) return AUDIO.ctx; const C = window.AudioContext || window.webkitAudioContext; if (!C) return null;
+  AUDIO.ctx = actx = new C(); AUDIO.master = mix = AUDIO.ctx.createGain(); AUDIO.master.gain.value = .8;
+  const comp = AUDIO.ctx.createDynamicsCompressor(); comp.threshold.value = -18; comp.ratio.value = 4; AUDIO.master.connect(comp); comp.connect(AUDIO.ctx.destination);
+  AUDIO.mus = AUDIO.ctx.createGain(); AUDIO.mus.gain.value = .22; AUDIO.mus.connect(AUDIO.master);
+  const b = AUDIO.ctx.createBuffer(1, AUDIO.ctx.sampleRate, AUDIO.ctx.sampleRate), d = b.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; AUDIO.soroll = b;
+  return AUDIO.ctx; }
+// Una nota: oscil·lador + envolupant (attack/decay) i lliscament de to opcional
+function nota(f, t, dur, o = {}){ const c = AUDIO.ctx, osc = c.createOscillator(), g = c.createGain(); osc.type = o.tipus || 'square';
+  osc.frequency.setValueAtTime(f, t); if (o.fins) osc.frequency.exponentialRampToValueAtTime(o.fins, t + dur);
+  g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(o.vol ?? .1, t + (o.atac ?? .005)); g.gain.exponentialRampToValueAtTime(.0008, t + dur);
+  osc.connect(g); g.connect(o.dest || AUDIO.master); osc.start(t); osc.stop(t + dur + .02); }
+function percussio(t, tipus){ const c = AUDIO.ctx; // bombo = sinus amb caiguda de to; caixa/xarles = soroll filtrat
+  if (tipus === 'bombo') { nota(150, t, .18, { tipus: 'sine', fins: 45, vol: .5, dest: AUDIO.mus }); return; }
+  const s = c.createBufferSource(), f = c.createBiquadFilter(), g = c.createGain(); s.buffer = AUDIO.soroll; f.type = tipus === 'xarles' ? 'highpass' : 'bandpass'; f.frequency.value = tipus === 'xarles' ? 7000 : 1800;
+  g.gain.setValueAtTime(tipus === 'xarles' ? .08 : .25, t); g.gain.exponentialRampToValueAtTime(.001, t + (tipus === 'xarles' ? .04 : .14)); s.connect(f); f.connect(g); g.connect(AUDIO.mus); s.start(t); s.stop(t + .2); }
+// SFX: cada crida varia el to ±6% perquè no sonin repetitius
+const SFX = { ok:[660,1320,.14,'square'], mal:[220,90,.35,'sawtooth'], clic:[520,520,.05,'square'], win:[523,1568,.45,'square'], bonus:[880,1760,.2,'triangle'], pop:[500,800,.1,'triangle'], tic:[900,900,.05,'sine'] };
+function so(tipus){ try { if (!audioInit()) return; const [f0, f1, dur, tp] = SFX[tipus] || SFX.clic, v = 1 + (Math.random() - .5) * .12, t = AUDIO.ctx.currentTime;
+  if (tipus === 'win') { [0, 4, 7, 12].forEach((s, i) => nota(523 * Math.pow(2, s / 12) * v, t + i * .09, .25, { tipus: 'square', vol: .09 })); return; }
+  nota(f0 * v, t, dur, { tipus: tp, fins: f1 * v, vol: .1 }); } catch (e) {} }
+// Seqüenciador: planifica amb 120 ms d'antelació des d'un temporitzador de 25 ms (el rellotge precís és el de l'AudioContext)
+const SEQ = { bpm: 126, pas: 0, seguent: 0, timer: null, lookahead: .12, interval: 25, estil: 'quiz' };
+const ESCALA = [0, 2, 4, 7, 9, 12, 14, 16]; // pentatònica major sobre Do
+const ESTILS = {
+  quiz:    { bpm: 126, base: 261.63, baix: [0,0,7,0, 5,5,0,5, 3,3,0,3, 5,5,7,7], ritme: 'bombo.xarles.caixa.xarles' },
+  suspens: { bpm: 100, base: 220,    baix: [0,0,0,3, 0,0,0,5, 0,0,0,3, 7,7,5,3], ritme: 'bombo.xarles.xarles.xarles', menor: true },
+};
+let melodia = [];
+function novaMelodia(){ const e = ESTILS[SEQ.estil]; let g = 3; melodia = Array.from({ length: 32 }, (_, i) => { if (i % 2 && Math.random() < .55) return null; g = Math.max(0, Math.min(ESCALA.length - 1, g + Math.round((Math.random() - .5) * 3))); return e.menor ? [0,3,5,7,10,12,15,17][g] : ESCALA[g]; }); }
+function tocaPas(p, t){ const e = ESTILS[SEQ.estil], r = e.ritme.split('.');
+  if (p % 4 === 0) percussio(t, r[0]); if (p % 4 === 2) percussio(t, 'xarles'); if (p % 8 === 4) percussio(t, r[2]); if (p % 2) percussio(t, 'xarles');
+  if (p % 2 === 0) { const s = e.baix[(p / 2) % 16]; nota(e.base / 2 * Math.pow(2, s / 12), t, .22, { tipus: 'triangle', vol: .16, dest: AUDIO.mus }); }
+  const m = melodia[p % 32]; if (m !== null && m !== undefined) nota(e.base * 2 * Math.pow(2, m / 12) * (1 + (Math.random() - .5) * .004), t, .16, { tipus: 'square', vol: .05, dest: AUDIO.mus, atac: .01 });
+  if (p === 31 && Math.random() < .4) novaMelodia(); }
+function planifica(){ const c = AUDIO.ctx, pasDur = 60 / SEQ.bpm / 4; while (SEQ.seguent < c.currentTime + SEQ.lookahead) { tocaPas(SEQ.pas, SEQ.seguent); SEQ.seguent += pasDur; SEQ.pas = (SEQ.pas + 1) % 32; } }
+function musicaInici(estil = SEQ.estil){ if (!audioInit() || SEQ.timer) return; SEQ.estil = estil; SEQ.bpm = ESTILS[estil].bpm; novaMelodia(); SEQ.pas = 0; SEQ.seguent = AUDIO.ctx.currentTime + .05;
+  AUDIO.mus.gain.cancelScheduledValues(AUDIO.ctx.currentTime); AUDIO.mus.gain.setTargetAtTime(.22, AUDIO.ctx.currentTime, .3); SEQ.timer = setInterval(planifica, SEQ.interval); }
+function musicaAtura(){ if (!SEQ.timer) return; clearInterval(SEQ.timer); SEQ.timer = null; AUDIO.mus.gain.setTargetAtTime(0, AUDIO.ctx.currentTime, .4); }
+function musicaCommuta(){ AUDIO.actiu = !AUDIO.actiu; localStorage.setItem('catquiz-musica', AUDIO.actiu ? '1' : '0'); if (AUDIO.actiu) musicaInici(); else musicaAtura(); return AUDIO.actiu; }
+
+// ---- Generadors de preguntes ----
 const GEN = {
-  catala: () => { const p = tria(DADES.cast); return { titol: 'Com diries en català?', mostra: [{ txt: cap(p[0]), x: true }], resposta: [{ txt: cap(p[1]), ok: true }] }; },
+  catala: () => { const p = tria(DADES.cast); return { titol: 'COM DIRIES EN\nCATALÀ?', mostra: { txt: cap(p[0]), x: true }, resposta: cap(p[1]) }; },
   accents: () => { const w = tria(DADES.accents), base = sense(w), VOC = { a:'aà', e:'eèé', i:'ií', o:'oòó', u:'uú' }, vs = new Set([base]);
     for (let i = 0; i < base.length; i++) for (const a of (VOC[base[i]] || '')) vs.add(base.slice(0, i) + a + base.slice(i + 1)); vs.delete(w);
-    const ops = barreja([w, ...barreja([...vs]).slice(0, 2)]); return { titol: "Com s'escriu?", opcions: ops.map((o, i) => ({ txt: o, lletra: 'ABC'[i], ok: o === w })) }; },
+    const ops = barreja([w, ...barreja([...vs]).slice(0, 2)]); return { titol: "COM S'ESCRIU?", opcions: ops.map((o, i) => ({ txt: o, lletra: 'ABC'[i], ok: o === w })) }; },
   intrus: () => { const noms = Object.keys(DADES.cats), a = tria(noms); let b; do { b = tria(noms); } while (b === a);
     const bons = barreja(DADES.cats[a].filter(w => w.length <= 11)).slice(0, 3), dolent = tria(DADES.cats[b].filter(w => w.length <= 11));
     const ops = barreja([...bons.map(w => ({ txt: cap(w.toLowerCase()), ok: false })), { txt: cap(dolent.toLowerCase()), ok: true }]);
-    return { titol: "Quin és l'intrús?", opcions: ops.map((o, i) => ({ ...o, lletra: 'ABCD'[i] })), pista: `Tres són: ${a}` }; },
+    return { titol: "QUIN ÉS\nL'INTRÚS?", opcions: ops.map((o, i) => ({ ...o, lletra: 'ABCD'[i] })), pista: `TRES SÓN: ${a.toUpperCase()}` }; },
   perdudes: () => { const noms = Object.keys(DADES.cats), c = tria(noms), w = tria(DADES.cats[c].filter(x => x.length >= 5 && x.length <= 10));
     const idx = barreja([...Array(w.length).keys()]).slice(0, Math.round(w.length * .45)); const forat = [...w].map((ch, i) => idx.includes(i) ? '_' : ch).join(' ');
-    return { titol: 'Quina paraula és?', mostra: [{ txt: forat, x: false }], resposta: [{ txt: w, ok: true }], pista: `Categoria: ${c}` }; },
+    return { titol: 'QUINA\nPARAULA ÉS?', mostra: { txt: forat, x: false }, resposta: w, pista: `CATEGORIA: ${c.toUpperCase()}` }; },
 };
 const CARTES = {
-  intro: ['SI NO ENCERTES<br>JA POTS TORNAR<br>A SECUNDÀRIA', 'NOMÉS UN 5%<br>LES ENCERTA TOTES', 'ATREVEIX-TE!<br>10 PREGUNTES,<br>7 SEGONS', 'ETS MÉS CATALÀ<br>QUE UN CALÇOT?'],
-  mig: ["DÓNA-LI AL M'AGRADA<br>SI HAS ENCERTAT<br>LES 3 PRIMERES", 'COMENTA<br>QUANTES EN PORTES'],
-  final: ["PREPARA'T PER A LA<br>DARRERA PREGUNTA", 'SEGUEIX-NOS', 'COMENTA QUANTES<br>PARAULES HAS<br>ENCERTAT'],
+  intro: ['SI NO ENCERTES\nJA POTS TORNAR\nA SECUNDÀRIA', 'NOMÉS UN 5%\nLES ENCERTA TOTES', 'ATREVEIX-TE!\n10 PREGUNTES,\n7 SEGONS', 'ETS MÉS CATALÀ\nQUE UN CALÇOT?'],
+  mig: ["DÓNA-LI AL M'AGRADA\nSI HAS ENCERTAT\nLES 3 PRIMERES", 'COMENTA\nQUANTES EN PORTES'],
+  final: ["PREPARA'T PER A LA\nDARRERA PREGUNTA", 'SEGUEIX-NOS', 'COMENTA QUANTES\nPARAULES HAS\nENCERTAT'],
 };
-function pill(o, cls = ''){ const d = document.createElement('div'); d.className = 'pill pop ' + cls; d.innerHTML = (o.lletra ? `<span class="lletra">${o.lletra}</span>` : '') + o.txt; return d; }
-function badge(el, tipus){ const b = document.createElement('div'); b.className = 'badge ' + tipus; b.textContent = tipus === 'x' ? '✕' : '✓'; el.appendChild(b); }
-async function carta(html, ms, cors){
-  const c = $('card'); c.hidden = false; c.innerHTML = `<div class="hex" style="left:-10%;top:5%"></div><div class="hex" style="right:-15%;bottom:0;animation-delay:2s"></div><div class="t">${html}</div>`;
-  if (cors) for (let i = 0; i < 14; i++) { const h = document.createElement('div'); h.className = 'cor'; h.textContent = tria(['❤️','💗','💖']); h.style.left = (5 + Math.random()*90) + '%'; h.style.animationDelay = (Math.random()*2) + 's'; c.appendChild(h); }
-  so('pop'); await espera(ms); c.hidden = true;
+
+// ---- Locució (TTS) ----
+// Text que es diu a cada moment; edita'l lliurement
+const GUIO = {
+  pregunta: p => p.opcions ? `${p.titol.replace('\n', ' ')} ${p.opcions.map(o => `${o.lletra}: ${o.txt}`).join('. ')}` : p.titol === 'QUINA\nPARAULA ÉS?' ? `Quina paraula és? ${p.pista.replace('CATEGORIA:', 'Categoria').toLowerCase()}` : `Com diries en català, ${p.mostra.txt}?`,
+  resposta: p => p.opcions ? `La resposta és la ${p.opcions.find(o => o.ok).lletra}: ${p.opcions.find(o => o.ok).txt}` : `${p.resposta}!`,
+};
+const veuCache = new Map(); let ttsMode = 'cap';
+async function sintetitza(text){
+  if (veuCache.has(text)) return veuCache.get(text);
+  const clau = $('clau').value.trim(), veu = $('veu').value.trim(), vel = Number($('vel').value) || 1; let bytes;
+  if (ttsMode === 'eleven') {
+    const r = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${veu || 'JBFqnCBsd6RMkjVDRZzb'}?output_format=mp3_44100_128`, { method: 'POST', headers: { 'xi-api-key': clau, 'Content-Type': 'application/json' }, body: JSON.stringify({ text, model_id: 'eleven_multilingual_v2', voice_settings: { stability: .5, similarity_boost: .8, speed: vel } }) });
+    if (!r.ok) throw new Error('ElevenLabs ' + r.status + ': ' + (await r.text()).slice(0, 120)); bytes = await r.arrayBuffer();
+  } else if (ttsMode === 'google') {
+    const r = await fetch(`https://texttospeech.googleapis.com/v1/text:synthesize?key=${clau}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ input: { text }, voice: { languageCode: 'ca-ES', name: veu || 'ca-ES-Standard-A' }, audioConfig: { audioEncoding: 'MP3', speakingRate: vel } }) });
+    if (!r.ok) throw new Error('Google TTS ' + r.status + ': ' + (await r.text()).slice(0, 160)); const j = await r.json(); bytes = Uint8Array.from(atob(j.audioContent), c => c.charCodeAt(0)).buffer;
+  } else return null;
+  const buf = await actx.decodeAudioData(bytes); veuCache.set(text, buf); return buf;
 }
+function parla(text){ // reprodueix una locució i resol quan acaba
+  return new Promise(res => {
+    if (ttsMode === 'navegador') { const u = new SpeechSynthesisUtterance(text); u.lang = 'ca-ES'; u.rate = Number($('vel').value) || 1; const v = speechSynthesis.getVoices().find(v => v.lang.startsWith('ca')); if (v) u.voice = v; u.onend = u.onerror = () => res(); speechSynthesis.speak(u); return; }
+    const buf = veuCache.get(text); if (!buf) return res();
+    musicaDuck(true); const src = actx.createBufferSource(); src.buffer = buf; src.connect(mix); src.onended = () => { musicaDuck(false); res(); }; src.start();
+  });
+}
+async function pregeneraVeus(textos){ // genera totes les locucions abans de començar perquè el ritme del vídeo sigui estable
+  const info = $('tts-info'); let i = 0;
+  for (const t of textos) { info.textContent = `Generant locució ${++i}/${textos.length}…`; await sintetitza(t); } info.textContent = `Locució a punt (${textos.length} frases).`;
+}
+$('tts').onchange = () => { ttsMode = $('tts').value; $('tts-cfg').style.display = ['eleven','google'].includes(ttsMode) ? 'block' : 'none';
+  $('tts-info').textContent = ttsMode === 'eleven' ? 'ElevenLabs: clau API + ID de veu (per defecte, una veu multilingüe). Model eleven_multilingual_v2 (català). ~10.000 caràcters gratis/mes.' : ttsMode === 'google' ? 'Google Cloud Text-to-Speech: clau API (amb l\'API activada) i nom de veu, p. ex. ca-ES-Standard-A. 1 milió de caràcters gratis/mes.' : ttsMode === 'navegador' ? 'Fa servir la veu en català del sistema si n\'hi ha. No queda gravada al vídeo.' : '';
+  localStorage.setItem('catquiz-tts', JSON.stringify({ m: ttsMode, k: $('clau').value, v: $('veu').value })); };
+$('btn-veus').onclick = async () => { // Google: demana les veus en català disponibles amb la clau
+  const info = $('tts-info'); if ($('tts').value !== 'google') { info.textContent = 'La llista de veus només és per a Google (a ElevenLabs, copia l\'ID de veu del seu web).'; return; }
+  try { const r = await fetch(`https://texttospeech.googleapis.com/v1/voices?languageCode=ca-ES&key=${$('clau').value.trim()}`); if (!r.ok) throw new Error(r.status + ' ' + (await r.text()).slice(0, 160));
+    const vs = (await r.json()).voices || []; $('veus').innerHTML = vs.map(v => `<option value="${v.name}">${v.ssmlGender.toLowerCase()}</option>`).join('');
+    info.textContent = vs.length ? 'Veus en català: ' + vs.map(v => `${v.name} (${v.ssmlGender[0]})`).join(', ') : 'Cap veu en català amb aquesta clau.'; if (vs.length && !$('veu').value) $('veu').value = vs[0].name; }
+  catch (e) { info.textContent = 'No puc llistar les veus: ' + e.message; } };
+$('clau').onchange = $('veu').onchange = () => localStorage.setItem('catquiz-tts', JSON.stringify({ m: ttsMode, k: $('clau').value, v: $('veu').value }));
+try { const c = JSON.parse(localStorage.getItem('catquiz-tts') || '{}'); if (c.m) { $('tts').value = c.m; $('clau').value = c.k || ''; $('veu').value = c.v || ''; $('tts').onchange(); } } catch (e) {}
+
+// ---- Música de fons ----
+let musicaBuf = null, musicaGain = null, musicaSrc = null;
+$('musica-tipus').onchange = () => { $('musica').style.display = $('musica-tipus').value === 'fitxer' ? 'inline' : 'none'; localStorage.setItem('catquiz-musica-tipus', $('musica-tipus').value); };
+$('musica-tipus').value = localStorage.getItem('catquiz-musica-tipus') || 'quiz'; $('musica-tipus').onchange();
+$('musica').onchange = async () => { const f = $('musica').files[0]; if (!f) return; $('musica-info').textContent = 'Carregant…';
+  try { audioInit(); musicaBuf = await actx.decodeAudioData(await f.arrayBuffer()); $('musica-info').textContent = `${f.name} · ${Math.round(musicaBuf.duration)} s (es repetirà si el vídeo és més llarg).`; }
+  catch (e) { musicaBuf = null; $('musica-info').textContent = 'No puc llegir aquest fitxer: ' + e.message; } };
+function musicaFons(){ const tipus = $('musica-tipus').value; if (tipus === 'quiz' || tipus === 'suspens') { musicaInici(tipus); AUDIO.mus.gain.value = Number($('vol').value); return; }
+  if (tipus !== 'fitxer' || !musicaBuf) return; musicaGain = actx.createGain(); musicaGain.gain.value = Number($('vol').value); musicaGain.connect(mix);
+  musicaSrc = actx.createBufferSource(); musicaSrc.buffer = musicaBuf; musicaSrc.loop = true; musicaSrc.connect(musicaGain); musicaSrc.start(); }
+function musicaDuck(baixa){ const g = musicaGain || (SEQ.timer ? AUDIO.mus : null); if (!g) return; const v = Number($('vol').value); g.gain.cancelScheduledValues(actx.currentTime); g.gain.setTargetAtTime(baixa ? v * .3 : v, actx.currentTime, .15); }
+function musicaFi(){ if (SEQ.timer) { musicaAtura(); return; } if (!musicaGain) return; musicaGain.gain.cancelScheduledValues(actx.currentTime); musicaGain.gain.setTargetAtTime(0, actx.currentTime, .6); setTimeout(() => { try { musicaSrc.stop(); } catch (e) {} musicaGain = null; }, 2500); }
+
+// ---- Estat que dibuixa el canvas ----
+const S = { pal: PAL[0], card: null, titol: '', pills: [], pista: '', bar: null, num: '', logo: '', t0: performance.now() };
+const cv = $('c'), g = cv.getContext('2d'), W = 1080, H = 1920;
+const FONT = "'Lilita One', 'Fredoka', sans-serif";
+function txt(s, x, y, mida, opts = {}){ g.font = `${mida}px ${FONT}`; g.textAlign = opts.align || 'center'; g.textBaseline = 'middle';
+  if (opts.ombra !== false) { g.fillStyle = '#2A1F4A'; g.fillText(s, x, y + mida * .07); }
+  g.lineWidth = opts.stroke ?? mida * .12; g.strokeStyle = '#2A1F4A'; g.lineJoin = 'round'; g.strokeText(s, x, y); g.fillStyle = opts.color || '#fff'; g.fillText(s, x, y); }
+function txtLinies(s, x, y, mida, lh = 1.1, opts){ const ls = s.split('\n'); ls.forEach((l, i) => txt(l, x, y + (i - (ls.length-1)/2) * mida * lh, mida, opts)); }
+function rrect(x, y, w, h, r){ g.beginPath(); g.roundRect(x, y, w, h, r); }
+function pill(p, y, alt = 135){
+  const x = 86, w = W - 172; g.save(); g.shadowColor = 'rgba(0,0,0,.18)'; g.shadowOffsetY = 10; g.fillStyle = p.estat === 'ok' ? '#7CE800' : '#fff'; if (p.estat === 'no') g.globalAlpha = .55; rrect(x, y, w, alt, alt/2); g.fill(); g.restore();
+  if (p.estat === 'no') g.globalAlpha = .55;
+  if (p.lletra) { g.fillStyle = S.pal[1]; g.beginPath(); g.arc(x + alt/2, y + alt/2, alt*.42, 0, 7); g.fill(); txt(p.lletra, x + alt/2, y + alt/2, 62, { ombra: false, stroke: 4 }); }
+  if (p.txt) { g.font = `${p.txt.length > 16 ? 56 : 72}px ${FONT}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = '#2A1F4A'; g.fillText(p.txt, W/2 + (p.lletra ? 20 : 0), y + alt/2 + 4); }
+  g.globalAlpha = 1;
+  if (p.badge) { const bx = x + w - 10, by = y - 10, r = 52; g.save(); g.shadowColor = 'rgba(0,0,0,.25)'; g.shadowOffsetY = 6; g.fillStyle = p.badge === 'x' ? '#D1252B' : '#2FAF3A'; g.beginPath(); g.arc(bx, by, r, 0, 7); g.fill(); g.restore();
+    g.lineWidth = 6; g.strokeStyle = '#fff'; g.beginPath(); g.arc(bx, by, r, 0, 7); g.stroke(); g.font = `bold 58px ${FONT}`; g.fillStyle = '#fff'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(p.badge === 'x' ? '✕' : '✓', bx, by + 3); }
+}
+function dibuixa(){
+  const t = (performance.now() - S.t0) / 1000;
+  // raigs
+  g.fillStyle = S.pal[0]; g.fillRect(0, 0, W, H);
+  g.save(); g.translate(W/2, H/2); g.rotate(t * .04); g.fillStyle = S.pal[1];
+  for (let i = 0; i < 14; i++) { g.beginPath(); g.moveTo(0, 0); g.arc(0, 0, 1600, i * Math.PI/7, i * Math.PI/7 + Math.PI/14); g.fill(); } g.restore();
+  if (S.card) { // carta plena
+    g.fillStyle = S.pal[2]; g.fillRect(0, 0, W, H);
+    g.fillStyle = 'rgba(255,255,255,.08)';
+    for (const [hx, hy] of [[120, 300 + Math.sin(t)*20], [960, 1550 - Math.sin(t)*20]]) { g.beginPath(); for (let i = 0; i < 6; i++) { const a = i * Math.PI/3 + t*.05; g.lineTo(hx + Math.cos(a)*340, hy + Math.sin(a)*340); } g.closePath(); g.fill(); }
+    if (S.card.cors) for (const c of S.card.cors) { const y = H + 80 - ((t - c.t0) * 500); if (y > -100) { g.font = `${c.s}px sans-serif`; g.textAlign = 'center'; g.fillText('❤️', c.x, y); } }
+    const esc = Math.min(1, (t - S.card.t0) * 3); g.save(); g.translate(W/2, H/2); g.scale(esc, esc); txtLinies(S.card.txt, 0, 0, 88, 1.15); g.restore();
+  } else {
+    if (S.titol) txtLinies(S.titol, W/2, 330, 82, 1.1);
+    let y = 600; for (const p of S.pills) { pill(p, y); y += 190; }
+    if (S.pista) txt(S.pista, W/2, y + 10, 44);
+    if (S.bar) { const by = S.pills.length > 1 ? 1480 : 900, frac = Math.max(0, 1 - (t - S.bar.t0) / S.bar.dur);
+      g.save(); g.shadowColor = 'rgba(0,0,0,.18)'; g.shadowOffsetY = 8; g.fillStyle = '#fff'; rrect(86, by, W - 172, 60, 30); g.fill(); g.restore();
+      if (frac > 0) { g.fillStyle = '#7CE800'; rrect(96, by + 10, (W - 192) * frac, 40, 20); g.fill(); }
+      if (S.num) txt(S.num, W/2, by + 120, 44); }
+  }
+  if (S.logo) { g.save(); g.translate(150, 90); g.rotate(-.1); g.fillStyle = '#fff'; g.font = `44px ${FONT}`; const w = g.measureText(S.logo).width + 50; rrect(-w/2, -36, w, 72, 36); g.fill(); g.fillStyle = '#2A1F4A'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(S.logo, 0, 3); g.restore(); }
+  requestAnimationFrame(dibuixa);
+}
+const ara = () => (performance.now() - S.t0) / 1000;
+async function carta(text, ms, cors){ S.card = { txt: text, t0: ara(), cors: cors ? Array.from({ length: 16 }, () => ({ x: 60 + Math.random()*960, t0: ara() + Math.random()*2, s: 60 + Math.random()*50 })) : null }; so('pop');
+  const v = ttsMode !== 'cap' ? parla(text.replace(/\n/g, ' ')) : null; await Promise.all([espera(ms), v]); S.card = null; }
 async function pregunta(p, i, n, seg){
-  const zona = $('zona'), bar = $('bar'); zona.innerHTML = ''; $('pregunta').textContent = p.titol; $('num').textContent = `${i}/${n}`;
-  bar.style.transition = 'none'; bar.style.transform = 'scaleX(1)';
-  if (p.opcions) { $('barra').style.top = 'auto'; $('barra').style.bottom = '22%'; $('num').style.top = 'auto'; $('num').style.bottom = '16%'; }
-  else { $('barra').style.top = '47%'; $('barra').style.bottom = 'auto'; $('num').style.top = '53%'; $('num').style.bottom = 'auto'; }
-  // pastilla buida i pista
-  if (p.opcions) for (const o of p.opcions) zona.appendChild(pill({ txt: '', lletra: o.lletra }, 'buida')); else zona.appendChild(pill({ txt: '' }, 'buida'));
-  await espera(700);
-  zona.innerHTML = '';
-  if (p.opcions) { p.opcions.forEach(o => zona.appendChild(pill(o))); if (p.pista) { const s = document.createElement('div'); s.className = 't'; s.style.fontSize = 'min(2.6vh,4vw)'; s.textContent = p.pista; zona.appendChild(s); } }
-  else { const d = pill(p.mostra[0]); if (p.mostra[0].x) badge(d, 'x'); zona.appendChild(d); if (p.pista) { const s = document.createElement('div'); s.className = 't'; s.style.fontSize = 'min(2.6vh,4vw)'; s.textContent = p.pista; zona.appendChild(s); } }
-  so('pop'); void bar.offsetWidth; bar.style.transition = `transform ${seg}s linear`; bar.style.transform = 'scaleX(0)';
+  S.titol = p.titol; S.num = `${i}/${n}`; S.bar = { t0: ara() + 99, dur: seg }; S.pista = '';
+  S.pills = p.opcions ? p.opcions.map(o => ({ lletra: o.lletra })) : [{}]; await espera(700);
+  S.pills = p.opcions ? p.opcions.map(o => ({ txt: o.txt, lletra: o.lletra })) : [{ txt: p.mostra.txt, badge: p.mostra.x ? 'x' : null }]; S.pista = p.pista || '';
+  so('pop'); if (ttsMode !== 'cap') parla(GUIO.pregunta(p)); S.bar = { t0: ara(), dur: seg };
   for (let s = 0; s < seg; s++) { await espera(1000); if (s >= seg - 3) so('tic'); }
-  // revelació
-  if (p.opcions) { [...zona.querySelectorAll('.pill')].forEach((d, k) => { if (p.opcions[k].ok) { d.classList.add('ok'); badge(d, 'v'); } else d.classList.add('no'); }); so('ok'); await espera(2600); }
-  else { zona.innerHTML = ''; zona.appendChild(pill({ txt: '' }, 'buida')); await espera(600); zona.innerHTML = ''; const d = pill(p.resposta[0]); badge(d, 'v'); zona.appendChild(d); so('ok'); await espera(2600); }
+  if (p.opcions) { S.pills = p.opcions.map(o => ({ txt: o.txt, lletra: o.lletra, estat: o.ok ? 'ok' : 'no', badge: o.ok ? 'v' : null })); so('ok'); await Promise.all([espera(2600), ttsMode !== 'cap' ? parla(GUIO.resposta(p)) : null]); }
+  else { S.pills = [{}]; await espera(600); S.pills = [{ txt: p.resposta, badge: 'v' }]; so('ok'); await Promise.all([espera(2600), ttsMode !== 'cap' ? parla(GUIO.resposta(p)) : null]); }
 }
-async function video(mode, n, seg, pal){
-  const p = pal === 4 || isNaN(pal) ? tria(PAL) : PAL[pal];
-  document.documentElement.style.setProperty('--a', p[0]); document.documentElement.style.setProperty('--b', p[1]); document.documentElement.style.setProperty('--c', p[2]);
+// ---- Gravació ----
+let recorder = null, trossos = [], tipusFitxer = 'webm';
+function comencaGravacio(){
+  const stream = cv.captureStream(30); const dest = actx.createMediaStreamDestination(); mix.connect(dest); for (const tr of dest.stream.getAudioTracks()) stream.addTrack(tr);
+  const mimes = ['video/mp4;codecs=avc1.42E01E,mp4a.40.2', 'video/mp4', 'video/webm;codecs=vp9,opus', 'video/webm'];
+  const mime = mimes.find(m => MediaRecorder.isTypeSupported(m)); tipusFitxer = mime.startsWith('video/mp4') ? 'mp4' : 'webm';
+  recorder = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 8e6 }); trossos = [];
+  recorder.ondataavailable = e => { if (e.data.size) trossos.push(e.data); };
+  recorder.start(1000); $('rec').style.display = 'block';
+}
+function acabaGravacio(){ return new Promise(res => { if (!recorder) return res(null); recorder.onstop = () => { $('rec').style.display = 'none'; res(new Blob(trossos, { type: recorder.mimeType })); }; recorder.stop(); }); }
+async function video(mode, n, seg, pal, grava){
+  S.pal = pal === 4 || isNaN(pal) ? tria(PAL) : PAL[pal];
   const usades = new Set(), preguntes = []; let guard = 0;
   while (preguntes.length < n && guard++ < 200) { const pr = GEN[mode](); const clau = JSON.stringify(pr); if (!usades.has(clau)) { usades.add(clau); preguntes.push(pr); } }
-  await carta(tria(CARTES.intro), 3000);
+  const intro = tria(CARTES.intro);
+  if (['eleven','google'].includes(ttsMode)) { // pregenera totes les veus (cartes, preguntes i respostes)
+    const textos = [intro, ...CARTES.mig, ...CARTES.final, "QUANTES N'HAS\nENCERTAT?\nComenta-ho 👇"].map(t => t.replace(/\n/g, ' '));
+    for (const p of preguntes) textos.push(GUIO.pregunta(p), GUIO.resposta(p));
+    try { $('menu').hidden = false; await pregeneraVeus([...new Set(textos)]); $('menu').hidden = true; }
+    catch (e) { $('tts-info').textContent = 'Error de locució: ' + e.message + ' — continuo sense veu.'; ttsMode = 'cap'; await espera(1500); $('menu').hidden = true; }
+  }
+  if (grava) comencaGravacio();
+  musicaFons();
+  await carta(intro, 3000);
   for (let i = 0; i < preguntes.length; i++) {
     if (i === 3) await carta(CARTES.mig[0], 3000, true);
     if (i === Math.floor(n / 2) + 1 && n >= 8) await carta(CARTES.mig[1], 2600);
-    if (i === preguntes.length - 1) { for (const c of CARTES.final) await carta(c, 2200); }
+    if (i === preguntes.length - 1) for (const c of CARTES.final) await carta(c, 2200);
     await pregunta(preguntes[i], i + 1, n, seg);
   }
-  $('zona').innerHTML = ''; $('pregunta').textContent = ''; $('num').textContent = '';
-  await carta('QUANTES N\'HAS<br>ENCERTAT?<br><span style="font-size:.6em">Comenta-ho 👇</span>', 4000, true);
+  S.pills = []; S.titol = ''; S.num = ''; S.bar = null; S.pista = '';
+  musicaFi(); await carta("QUANTES N'HAS\nENCERTAT?\nComenta-ho 👇", 4000, true);
+  const blob = await acabaGravacio();
+  const r = $('resultat'); r.innerHTML = '';
+  if (blob) { const a = document.createElement('a'); a.className = 'baixa'; a.href = URL.createObjectURL(blob); a.download = `catquiz-${mode}-${Date.now()}.${tipusFitxer}`; a.textContent = `⬇ Descarrega el vídeo (.${tipusFitxer}, ${(blob.size/1048576).toFixed(1)} MB)`; r.appendChild(a); }
   $('menu').hidden = false;
 }
-$('go').onclick = () => { $('menu').hidden = true; $('logo').textContent = $('logotxt').value; video($('mode').value, Number($('n').value), Number($('seg').value), Number($('pal').value)); };
-if (q.get('mode')) { $('mode').value = q.get('mode'); if (q.get('n')) $('n').value = q.get('n'); if (q.get('seg')) $('seg').value = q.get('seg'); if (q.get('pal')) $('pal').value = q.get('pal'); if (q.get('logo')) $('logotxt').value = q.get('logo'); }
+$('go').onclick = async () => {
+  audioInit();
+  await document.fonts.load(`80px 'Lilita One'`).catch(() => {});
+  ttsMode = $('tts').value; $('menu').hidden = true; S.logo = $('logotxt').value; video($('mode').value, Number($('n').value), Number($('seg').value), Number($('pal').value), $('grava').checked);
+};
+if (q.get('mode')) { $('mode').value = q.get('mode'); if (q.get('n')) $('n').value = q.get('n'); if (q.get('seg')) $('seg').value = q.get('seg'); if (q.get('pal')) $('pal').value = q.get('pal'); if (q.get('logo')) $('logotxt').value = q.get('logo'); if (q.get('grava') === '0') $('grava').checked = false; }
+dibuixa();
 if (q.has('auto')) $('go').click();
 </script>
 </body>

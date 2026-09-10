@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Xerinola · Reel</title>
+<title>CatQuiz Minijocs · Reel</title>
 <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Fredoka:wght@600;700&display=swap" rel="stylesheet">
 <style>
   *{box-sizing:border-box;margin:0}
@@ -60,7 +60,7 @@
   <div id="progres"><i></i></div>
   <div id="flaix"></div>
   <div id="inici"><div><p style="font-size:min(4vh,6vw);margin-bottom:4%">Tria el reel</p><div id="botons"></div><small>Cada reel dura uns 28 s i es repeteix en bucle. Grava només el rectangle vertical. Paràmetres: <b>?joc=motle</b> · <b>?joc=motle&amp;quiz</b> · <b>?marca=@usuari</b> (per defecte, sense marca)</small></div></div>
-  <div id="marca">xerinola.games</div>
+  <div id="marca">catquiz.cat</div>
 </div>
 
 <script>
@@ -116,7 +116,7 @@ function subtitol(text, pos, ms){
   setTimeout(() => { s.classList.add('fora'); setTimeout(() => s.remove(), 300); }, ms);
 }
 let resolQuiz = null, resolFi = null;
-addEventListener('message', e => { const m = e.data && e.data.xerinola; if (m === 'quiz' && resolQuiz) resolQuiz(); if (m === 'fi' && resolFi) resolFi(); });
+addEventListener('message', e => { const m = e.data && e.data.catquiz; if (m === 'quiz' && resolQuiz) resolQuiz(); if (m === 'fi' && resolFi) resolFi(); });
 async function pregunta(){ // "Quina és?" + compte enrere de 4,5 s + barra que es buida (format CatQuiz)
   const d = document.createElement('div'); d.className = 'quiz'; d.innerHTML = `<div class="preg">QUINA ÉS? 🤔<br><span style="font-size:.55em">Escriu-la als comentaris 👇</span></div><div class="num"></div><div class="barra"><i></i></div>`;
   escenari.appendChild(d); sacseig(); const num = d.querySelector('.num');
