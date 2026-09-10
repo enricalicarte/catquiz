@@ -48,7 +48,7 @@
   .quiz .barra{position:absolute;left:8%;right:8%;bottom:14%;height:2.4%;background:rgba(255,255,255,.35);border:3px solid #1D2B64;border-radius:999px;overflow:hidden}
   .quiz .barra i{display:block;height:100%;width:100%;background:#7CE800;transform-origin:left;animation:buida 4.5s linear forwards}
   @keyframes buida{to{transform:scaleX(0)}}
-  #marca{position:absolute;left:50%;top:13%;transform:translateX(-50%) rotate(-2deg);background:#1D2B64;color:#FFD600;font-weight:700;font-size:min(2.4vh,3.6vw);padding:1% 4%;border-radius:999px;border:3px solid #FFD600;pointer-events:none;z-index:6}
+  #marca{position:absolute;left:50%;bottom:2.5%;transform:translateX(-50%) rotate(-2deg);background:#1D2B64;color:#FFD600;font-weight:700;font-size:min(2.4vh,3.6vw);padding:1% 4%;border-radius:999px;border:3px solid #FFD600;pointer-events:none;z-index:6}
   #inici{position:absolute;inset:0;display:grid;place-items:center;background:rgba(27,17,64,.92);z-index:10;text-align:center;padding:8%}
   #inici[hidden]{display:none}
   #inici button{font:inherit;font-weight:700;font-size:min(3.4vh,5vw);background:#FF3E9A;color:#FFFFFF;border:3px solid #1D2B64;border-radius:999px;padding:3% 7%;cursor:pointer;box-shadow:6px 6px 0 #1D2B64;margin:2%}
@@ -59,19 +59,24 @@
 <div id="escenari">
   <div id="progres"><i></i></div>
   <div id="flaix"></div>
-  <div id="inici"><div><p style="font-size:min(4vh,6vw);margin-bottom:4%">Tria el reel</p><div id="botons"></div><small>Cada reel dura uns 28 s i es repeteix en bucle. Grava només el rectangle vertical. Paràmetres: <b>?joc=motle</b> · <b>?marca=@usuari</b> · <b>?marca=0</b></small></div></div>
+  <div id="inici"><div><p style="font-size:min(4vh,6vw);margin-bottom:4%">Tria el reel</p><div id="botons"></div><small>Cada reel dura uns 28 s i es repeteix en bucle. Grava només el rectangle vertical. Paràmetres: <b>?joc=motle</b> · <b>?joc=motle&amp;quiz</b> · <b>?marca=@usuari</b> (per defecte, sense marca)</small></div></div>
   <div id="marca">xerinola.games</div>
 </div>
 
 <script>
 // Un reel per joc: hook (1.8 s) → joc jugant sol amb subtítols i zooms (≈22 s) → CTA (3 s) → bucle
 const q = new URLSearchParams(location.search);
-const marca = document.getElementById('marca'); if (q.get('marca') === '0') marca.hidden = true; else if (q.get('marca')) marca.textContent = q.get('marca');
+const marca = document.getElementById('marca'); marca.hidden = !q.get('marca') || q.get('marca') === '0'; if (q.get('marca')) marca.textContent = q.get('marca');
 const QUIZ = q.has('quiz');
 const REELS = {
   quizmotle: { quiz:'motle', t:'Motle', e:'🟩', tipus:'QUIZ', c:'#FFD600', hook:'Quina paraula és?', sub:'5 lletres · 6 intents', guio:[[1,'Verd = lloc correcte · Groc = hi és','baix']] },
   quizpenjat: { quiz:'penjat', t:'Penjat 3D', e:'🪢', tipus:'QUIZ', c:'#7CE800', hook:'Endevina la paraula', sub:'Abans que el bot!', guio:[[1,'Cada error, una peça del ninot','baix']] },
   quizanagrama: { quiz:'anagrama', t:'Anagrama', e:'🔀', tipus:'QUIZ', c:'#9B5CFF', hook:'Ordena les lletres', sub:'Quina paraula amaguen?', guio:[[1,'Fixa\'t en la pista','baix']] },
+  quizcatala: { quiz:'catala', t:'Com es diu en català?', e:'🗣️', tipus:'QUIZ', c:'#FF3E9A', hook:'Com es diu en català?', sub:'Ho saps?', guio:[[1,'3 opcions · 12 segons','baix']] },
+  quizintrus: { quiz:'intrus', t:"L'intrús", e:'🕵️', tipus:'QUIZ', c:'#33E0FF', hook:'Quin és l\'intrús?', sub:'Tres van juntes…', guio:[[1,'Una no hi pinta res','baix']] },
+  quizaccents: { quiz:'accents', t:'Accents!', e:'✍️', tipus:'QUIZ', c:'#FF8C1A', hook:'Com s\'escriu?', sub:'Només una és correcta', guio:[[1,'Obert, tancat o cap?','baix']] },
+  quizperdudes: { quiz:'perdudes', t:'Lletres perdudes', e:'🧩', tipus:'QUIZ', c:'#7CE800', hook:'Quines lletres falten?', sub:'Completa la paraula', guio:[[1,'Tres errors i es revela','baix']] },
+  quizsopa: { quiz:'sopa', t:'Sopa de lletres', e:'🍲', tipus:'QUIZ', c:'#33E0FF', hook:'En veus alguna?', sub:'6 paraules amagades', guio:[[1,'Horitzontal, vertical o diagonal','baix']] },
   esquiva: { t:'Esquiva!', e:'🧊', tipus:'ACCIÓ', c:'#FF3E9A', hook:'Quant aguantes?', sub:'Cada segon compta',
     guio:[[1,'3 carrils. 0 frens.','dalt'],[4.5,'Moneda = +10 punts','baix'],[8,'Cada cop va més ràpid…','dalt','zoom'],[12,'Fletxes o un dit. I prou.','baix'],[16,'El teu rècord es guarda','dalt'],[19.5,'Pots superar els 300?','baix','zoom']] },
   estrelles: { t:'Caça estrelles', e:'⭐', tipus:'ACCIÓ', c:'#33E0FF', hook:'40 segons.', sub:'Quantes estrelles?',
@@ -80,6 +85,16 @@ const REELS = {
     guio:[[1,'5 lletres, 6 intents','dalt'],[4.5,'Verd = lloc correcte','baix'],[8,'Groc = hi és, però no aquí','baix','zoom'],[12,'500 paraules','dalt'],[15.5,'Paraula del dia cada dia','baix'],[19,'La teva ratxa es guarda 🔥','dalt','zoom']] },
   penjat: { t:'Penjat 3D', e:'🪢', tipus:'PARAULES', c:'#7CE800', hook:'El penjat.', sub:'Peça a peça',
     guio:[[1,'12 categories','dalt'],[4.5,'Cada error, una peça','baix','zoom'],[8,'8 errors i… penjat','dalt'],[11.5,'Pista: una lletra per 2 errors','baix'],[15,'548 paraules en català','dalt'],[19,'Quina ratxa faràs?','baix','zoom']] },
+  catala: { t:'Com es diu en català?', e:'🗣️', tipus:'PARAULES', c:'#FF3E9A', hook:'Com es diu en català?', sub:'220 castellanismes',
+    guio:[[1,'Un castellanisme, tres opcions','dalt'],[5,'12 segons per ronda','baix'],[9,'Ratxa de 3 = punts dobles','dalt','zoom'],[14,'Tot en català, tot en 3D','baix'],[19,'Quantes en saps?','dalt','zoom']] },
+  intrus: { t:"L'intrús", e:'🕵️', tipus:'PARAULES', c:'#33E0FF', hook:'Quin és l\'intrús?', sub:'Tres van juntes',
+    guio:[[1,'12 categories barrejades','dalt'],[5,'Toca la que sobra','baix'],[9,'Cada segon que et sobra, suma','dalt','zoom'],[14,'10 rondes','baix'],[19,'Ratxa ×3 = punts dobles','dalt','zoom']] },
+  accents: { t:'Accents!', e:'✍️', tipus:'PARAULES', c:'#FF8C1A', hook:'Obert o tancat?', sub:'Tria la forma correcta',
+    guio:[[1,'Una paraula, tres grafies','dalt'],[5,'10 segons','baix'],[9,'Només una és correcta','dalt','zoom'],[14,'116 paraules traïdores','baix'],[19,'Te\'n sortiries?','dalt','zoom']] },
+  perdudes: { t:'Lletres perdudes', e:'🧩', tipus:'PARAULES', c:'#7CE800', hook:'Falten lletres!', sub:'Completa la paraula',
+    guio:[[1,'Escriu les que falten','dalt'],[5,'La groga és la següent','baix'],[9,'Tres errors i es revela','dalt','zoom'],[14,'548 paraules per categories','baix'],[19,'20 segons per ronda','dalt','zoom']] },
+  sopa: { t:'Sopa de lletres', e:'🍲', tipus:'PARAULES', c:'#33E0FF', hook:'Sopa de lletres', sub:'En 3D i en català',
+    guio:[[1,'6 paraules amagades','dalt'],[5,'Arrossega per marcar','baix'],[9,'Horitzontal, vertical i diagonal','dalt','zoom'],[14,'150 segons','baix'],[19,'Les trobaries totes?','dalt','zoom']] },
   anagrama: { t:'Anagrama', e:'🔀', tipus:'PARAULES', c:'#9B5CFF', hook:'Lletres barrejades.', sub:'Contrarellotge',
     guio:[[1,'Toca-les en ordre','dalt'],[4.5,'Encert = +5 segons','baix'],[8,'Cada cop més llargues','dalt','zoom'],[11.5,'Combo fins a ×4','baix','zoom'],[15,'500 paraules amb pista','dalt'],[19,'Ho fas abans que el bot?','baix']] },
 };

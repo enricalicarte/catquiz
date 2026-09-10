@@ -79,7 +79,7 @@
 
   <section>
     <h2>Jocs de paraules</h2>
-    <p class="nota">Lletres en 3D i paraules en català. Tot el vocabulari és dins de cada fitxer: pots ampliar-lo tu mateix.</p>
+    <p class="nota">Vuit jocs de paraules en català, en 3D. Tot el vocabulari és dins de cada fitxer.</p>
     <div class="graella">
       <a class="carta" href="jocs/motle.html"><div class="cap c3"><span>🟩</span><i class="tipus">paraules</i></div>
         <div class="cos"><h3>Motle</h3><p>Cinc lletres, sis intents i 500 paraules. Mode aleatori o paraula del dia.</p><span class="juga">Juga-hi</span></div></a>
@@ -87,14 +87,19 @@
         <div class="cos"><h3>Penjat 3D</h3><p>El clàssic amb categories, pistes i un ninot que es munta peça a peça a cada error.</p><span class="juga">Juga-hi</span></div></a>
       <a class="carta" href="jocs/anagrama.html"><div class="cap c5"><span>🔀</span><i class="tipus">paraules</i></div>
         <div class="cos"><h3>Anagrama</h3><p>Més de 500 paraules per recompondre contra el rellotge. Encadena encerts i el combo multiplica.</p><span class="juga">Juga-hi</span></div></a>
+      <a class="carta" href="jocs/catala.html"><div class="cap c1"><span>🗣️</span><i class="tipus">paraules</i></div>
+        <div class="cos"><h3>Com es diu en català?</h3><p>Un castellanisme, tres opcions i 12 segons. 220 parelles per treure't la "carajillo" del cap.</p><span class="juga">Juga-hi</span></div></a>
+      <a class="carta" href="jocs/intrus.html"><div class="cap c2"><span>🕵️</span><i class="tipus">paraules</i></div>
+        <div class="cos"><h3>L'intrús</h3><p>Quatre paraules, tres de la mateixa categoria. Troba la que no hi pinta res.</p><span class="juga">Juga-hi</span></div></a>
+      <a class="carta" href="jocs/accents.html"><div class="cap c6"><span>✍️</span><i class="tipus">paraules</i></div>
+        <div class="cos"><h3>Accents!</h3><p>«Tràgic», «tragíc» o «tragic»? Tria la forma ben escrita en 10 segons.</p><span class="juga">Juga-hi</span></div></a>
+      <a class="carta" href="jocs/perdudes.html"><div class="cap c4"><span>🧩</span><i class="tipus">paraules</i></div>
+        <div class="cos"><h3>Lletres perdudes</h3><p>Una paraula amb forats. Escriu les lletres que falten abans de tres errors.</p><span class="juga">Juga-hi</span></div></a>
+      <a class="carta" href="jocs/sopa.html"><div class="cap c2"><span>🍲</span><i class="tipus">paraules</i></div>
+        <div class="cos"><h3>Sopa de lletres</h3><p>Sis paraules d'una categoria amagades en una graella 8×8. Arrossega i troba-les totes.</p><span class="juga">Juga-hi</span></div></a>
     </div>
   </section>
 
-  <section>
-    <h2>Més jocs</h2>
-    <p class="nota">Per afegir un joc nou, posa el seu HTML a la carpeta <b>jocs/</b> i copia una carta d'aquestes.</p>
-    <div class="graella" id="mes-jocs"></div>
-  </section>
 </main>
 <footer>Fet amb Three.js. Sense build, sense servidor: és un GitHub Pages i prou.</footer>
 
@@ -106,18 +111,6 @@
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 
-// Cartes extra: afegeix-hi els teus jocs propis (fitxer, títol, descripció, emoji, color)
-const mesJocs = [
-  { f:'olimpiades-granja.html', t:'Olimpíades de la Granja', d:'Deu proves d\'estiu i d\'hivern per als més petits.', e:'🐷', c:'c6' },
-  { f:'anguera-superstars.html', t:'Anguera Superstars', d:'Futbol 7 arcade amb lliga i temporades.', e:'⚽', c:'c4' },
-  { f:'porrazo-party.html', t:'Porrazo Party', d:'Lluita 3D de dibuixos animats. Colla d\'amics i pallisses.', e:'👊', c:'c1' },
-  { f:'turbo-kart-rally.html', t:'Turbo Kart Rally', d:'Karts, derrapades i ítems. Qui arriba primer?', e:'🏎️', c:'c2' },
-  { f:'aura-battle.html', t:'Aura Battle', d:'Batalla de ball al ritme de la música.', e:'🕺', c:'c5' },
-  { f:'futbol-retro.html', t:'Futbol Retro 7v7', d:'Futbol de sala amb estètica dels vuitanta.', e:'🎮', c:'c3' },
-];
-document.getElementById('mes-jocs').innerHTML = mesJocs.map(j =>
-  `<a class="carta" href="jocs/${j.f}"><div class="cap ${j.c}"><span>${j.e}</span><i class="tipus">propi</i></div>
-   <div class="cos"><h3>${j.t}</h3><p>${j.d}</p><span class="juga">Juga-hi</span></div></a>`).join('');
 
 // Fons 3D estil Stumble Guys: núvols i plataformes de colors que suren
 const canvas = document.getElementById('escena');
