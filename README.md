@@ -35,6 +35,12 @@ Three.js es carrega des d'unpkg amb un `importmap` (versió 0.160.0).
 - Qualsevol joc també accepta `?demo` directament (p. ex. `jocs/motle.html?demo`) per gravar-lo sol.
 - Per gravar: obre-ho a Chrome, F12 → mode dispositiu → 1080×1920 (o directament al mòbil en vertical) i grava la pantalla.
 
+## Gravar els reels
+A `demo.html`, marca «⏺ Grava el reel» abans de triar-lo: Chrome demana compartir la pestanya (tria «Aquesta pestanya» i marca «Compartir àudio»); el reel fa una sola passada, es retalla al rectangle 9:16 (Region Capture) i en acabar surt el botó de descàrrega (MP4 a Chrome/Edge). Fes la finestra alta i estreta perquè el rectangle sigui gran: la resolució del vídeo és la del rectangle en pantalla. Per URL: `demo.html?joc=motle&quiz&grava`.
+
+## Pantalla fixa
+Tots els jocs bloquegen el zoom (pinça i doble toc) i el desplaçament lateral; la portada només permet el desplaçament vertical.
+
 ## Format quiz (per al canal CatQuiz)
 - `demo.html?joc=motle&quiz` (també `penjat`, `anagrama`, `catala`, `intrus`, `accents`, `perdudes` i `sopa`): el joc juga sol fins a mig camí, apareix "QUINA ÉS? Escriu-la als comentaris" amb compte enrere, i després el bot revela la solució amb confeti. Acaba amb la carta "L'has encertada?".
 - La pausa la decideix cada joc (`?demo&quiz`): Motle després de 2 intents, Penjat amb la meitat de lletres vistes, Anagrama a la segona paraula.

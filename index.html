@@ -2,7 +2,7 @@
 <html lang="ca">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>CatQuiz Minijocs</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
@@ -10,7 +10,7 @@
   :root{--cel:#5EC8FF;--cel2:#1E7BE0;--marí:#1D2B64;--rosa:#FF3E9A;--taronja:#FF8C1A;--groc:#FFD600;--llima:#7CE800;--lila:#9B5CFF;--neu:#FFFFFF}
   *{box-sizing:border-box;margin:0}
   html,body{height:100%}
-  body{font-family:'Fredoka',system-ui,sans-serif;background:linear-gradient(180deg,var(--cel) 0%,var(--cel2) 100%);color:var(--neu);overflow-x:hidden}
+  body{overscroll-behavior-x:none;touch-action:pan-y;font-family:'Fredoka',system-ui,sans-serif;background:linear-gradient(180deg,var(--cel) 0%,var(--cel2) 100%);color:var(--neu);overflow-x:hidden}
   #escena{position:fixed;inset:0;z-index:0}
   main{position:relative;z-index:1}
   header{min-height:92vh;display:grid;place-items:center;text-align:center;padding:24px}
