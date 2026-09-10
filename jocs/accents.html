@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Accents! · Xerinola</title>
+<title>Accents! · CatQuiz Minijocs</title>
 <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
   /* Estil Stumble Guys: cel blau, colors saturats, contorns gruixuts i botons amb aresta 3D */
@@ -70,7 +70,7 @@
 </style>
 </head>
 <body>
-<div class="hud"><a class="pill" href="../index.html">← Xerinola</a><span class="pill cat" id="ronda">1 / 10</span><span class="pill acc" id="punts">0</span></div>
+<div class="hud"><a class="pill" href="../index.html">← CatQuiz</a><button class="pill" id="btn-musica" style="font-size:16px;padding:5px 10px;cursor:pointer">🎵</button><span class="pill cat" id="ronda">1 / 10</span><span class="pill acc" id="punts">0</span></div>
 <div class="missatge" id="missatge"></div>
 <div class="barra"><i id="barra"></i></div>
 <div class="pregunta" id="pregunta"></div>
@@ -84,17 +84,53 @@
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 await document.fonts.ready;
-// Sons sintetitzats (sense fitxers d'àudio)
-let actx;
-function so(tipus){ try { actx ||= new (window.AudioContext || window.webkitAudioContext)();
-  const cfg = { ok:[660,1320,.12], mal:[220,90,.35], clic:[520,520,.05], win:[523,1568,.45], bonus:[880,1760,.2] }[tipus];
-  const o = actx.createOscillator(), g = actx.createGain(); o.connect(g); g.connect(actx.destination); o.type = 'square';
-  const t = actx.currentTime; o.frequency.setValueAtTime(cfg[0], t); o.frequency.exponentialRampToValueAtTime(cfg[1], t + cfg[2]);
-  g.gain.setValueAtTime(.1, t); g.gain.exponentialRampToValueAtTime(.001, t + cfg[2]); o.start(t); o.stop(t + cfg[2]); } catch (e) {} }
+// ===== Motor d'àudio 100% procedural (Web Audio) =====
+// Bus mestre amb guany i compressor → SFX per oscil·ladors amb variació aleatòria de to → música per seqüenciador amb lookahead
+const AUDIO = { ctx: null, master: null, mus: null, soroll: null, actiu: localStorage.getItem('catquiz-musica') !== '0' };
+function audioInit(){ if (AUDIO.ctx) return AUDIO.ctx; const C = window.AudioContext || window.webkitAudioContext; if (!C) return null;
+  AUDIO.ctx = new C(); AUDIO.master = AUDIO.ctx.createGain(); AUDIO.master.gain.value = .8;
+  const comp = AUDIO.ctx.createDynamicsCompressor(); comp.threshold.value = -18; comp.ratio.value = 4; AUDIO.master.connect(comp); comp.connect(AUDIO.ctx.destination);
+  AUDIO.mus = AUDIO.ctx.createGain(); AUDIO.mus.gain.value = .22; AUDIO.mus.connect(AUDIO.master);
+  const b = AUDIO.ctx.createBuffer(1, AUDIO.ctx.sampleRate, AUDIO.ctx.sampleRate), d = b.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; AUDIO.soroll = b;
+  return AUDIO.ctx; }
+// Una nota: oscil·lador + envolupant (attack/decay) i lliscament de to opcional
+function nota(f, t, dur, o = {}){ const c = AUDIO.ctx, osc = c.createOscillator(), g = c.createGain(); osc.type = o.tipus || 'square';
+  osc.frequency.setValueAtTime(f, t); if (o.fins) osc.frequency.exponentialRampToValueAtTime(o.fins, t + dur);
+  g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(o.vol ?? .1, t + (o.atac ?? .005)); g.gain.exponentialRampToValueAtTime(.0008, t + dur);
+  osc.connect(g); g.connect(o.dest || AUDIO.master); osc.start(t); osc.stop(t + dur + .02); }
+function percussio(t, tipus){ const c = AUDIO.ctx; // bombo = sinus amb caiguda de to; caixa/xarles = soroll filtrat
+  if (tipus === 'bombo') { nota(150, t, .18, { tipus: 'sine', fins: 45, vol: .5, dest: AUDIO.mus }); return; }
+  const s = c.createBufferSource(), f = c.createBiquadFilter(), g = c.createGain(); s.buffer = AUDIO.soroll; f.type = tipus === 'xarles' ? 'highpass' : 'bandpass'; f.frequency.value = tipus === 'xarles' ? 7000 : 1800;
+  g.gain.setValueAtTime(tipus === 'xarles' ? .08 : .25, t); g.gain.exponentialRampToValueAtTime(.001, t + (tipus === 'xarles' ? .04 : .14)); s.connect(f); f.connect(g); g.connect(AUDIO.mus); s.start(t); s.stop(t + .2); }
+// SFX: cada crida varia el to ±6% perquè no sonin repetitius
+const SFX = { ok:[660,1320,.14,'square'], mal:[220,90,.35,'sawtooth'], clic:[520,520,.05,'square'], win:[523,1568,.45,'square'], bonus:[880,1760,.2,'triangle'], pop:[500,800,.1,'triangle'], tic:[900,900,.05,'sine'] };
+function so(tipus){ try { if (!audioInit()) return; const [f0, f1, dur, tp] = SFX[tipus] || SFX.clic, v = 1 + (Math.random() - .5) * .12, t = AUDIO.ctx.currentTime;
+  if (tipus === 'win') { [0, 4, 7, 12].forEach((s, i) => nota(523 * Math.pow(2, s / 12) * v, t + i * .09, .25, { tipus: 'square', vol: .09 })); return; }
+  nota(f0 * v, t, dur, { tipus: tp, fins: f1 * v, vol: .1 }); if (tipus === 'clic' && AUDIO.actiu) musicaInici(); } catch (e) {} }
+// Seqüenciador: planifica amb 120 ms d'antelació des d'un temporitzador de 25 ms (el rellotge precís és el de l'AudioContext)
+const SEQ = { bpm: 126, pas: 0, seguent: 0, timer: null, lookahead: .12, interval: 25, estil: 'quiz' };
+const ESCALA = [0, 2, 4, 7, 9, 12, 14, 16]; // pentatònica major sobre Do
+const ESTILS = {
+  quiz:    { bpm: 126, base: 261.63, baix: [0,0,7,0, 5,5,0,5, 3,3,0,3, 5,5,7,7], ritme: 'bombo.xarles.caixa.xarles' },
+  suspens: { bpm: 100, base: 220,    baix: [0,0,0,3, 0,0,0,5, 0,0,0,3, 7,7,5,3], ritme: 'bombo.xarles.xarles.xarles', menor: true },
+};
+let melodia = [];
+function novaMelodia(){ const e = ESTILS[SEQ.estil]; let g = 3; melodia = Array.from({ length: 32 }, (_, i) => { if (i % 2 && Math.random() < .55) return null; g = Math.max(0, Math.min(ESCALA.length - 1, g + Math.round((Math.random() - .5) * 3))); return e.menor ? [0,3,5,7,10,12,15,17][g] : ESCALA[g]; }); }
+function tocaPas(p, t){ const e = ESTILS[SEQ.estil], r = e.ritme.split('.');
+  if (p % 4 === 0) percussio(t, r[0]); if (p % 4 === 2) percussio(t, 'xarles'); if (p % 8 === 4) percussio(t, r[2]); if (p % 2) percussio(t, 'xarles');
+  if (p % 2 === 0) { const s = e.baix[(p / 2) % 16]; nota(e.base / 2 * Math.pow(2, s / 12), t, .22, { tipus: 'triangle', vol: .16, dest: AUDIO.mus }); }
+  const m = melodia[p % 32]; if (m !== null && m !== undefined) nota(e.base * 2 * Math.pow(2, m / 12) * (1 + (Math.random() - .5) * .004), t, .16, { tipus: 'square', vol: .05, dest: AUDIO.mus, atac: .01 });
+  if (p === 31 && Math.random() < .4) novaMelodia(); }
+function planifica(){ const c = AUDIO.ctx, pasDur = 60 / SEQ.bpm / 4; while (SEQ.seguent < c.currentTime + SEQ.lookahead) { tocaPas(SEQ.pas, SEQ.seguent); SEQ.seguent += pasDur; SEQ.pas = (SEQ.pas + 1) % 32; } }
+function musicaInici(estil = SEQ.estil){ if (!audioInit() || SEQ.timer) return; SEQ.estil = estil; SEQ.bpm = ESTILS[estil].bpm; novaMelodia(); SEQ.pas = 0; SEQ.seguent = AUDIO.ctx.currentTime + .05;
+  AUDIO.mus.gain.cancelScheduledValues(AUDIO.ctx.currentTime); AUDIO.mus.gain.setTargetAtTime(.22, AUDIO.ctx.currentTime, .3); SEQ.timer = setInterval(planifica, SEQ.interval); }
+function musicaAtura(){ if (!SEQ.timer) return; clearInterval(SEQ.timer); SEQ.timer = null; AUDIO.mus.gain.setTargetAtTime(0, AUDIO.ctx.currentTime, .4); }
+Object.assign(window, { AUDIO, SEQ, so, musicaCommuta: () => musicaCommuta() }); // accessibles des de la consola
+function musicaCommuta(){ AUDIO.actiu = !AUDIO.actiu; localStorage.setItem('catquiz-musica', AUDIO.actiu ? '1' : '0'); if (AUDIO.actiu) musicaInici(); else musicaAtura(); return AUDIO.actiu; }
 
 const DEMO = new URLSearchParams(location.search).has('demo'); // ?demo → juga sol (reels)
 const QUIZ = new URLSearchParams(location.search).has('quiz'); // ?demo&quiz → pausa "Quina és?"
-const avisa = tipus => { try { parent.postMessage({ xerinola: tipus }, '*'); } catch (e) {} };
+const avisa = tipus => { try { parent.postMessage({ catquiz: tipus }, '*'); } catch (e) {} };
 const espera = ms => new Promise(r => setTimeout(r, ms));
 const norm = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase();
 const barreja = a => a.slice().sort(() => Math.random() - .5);
@@ -220,7 +256,7 @@ const barra = document.getElementById('barra');
 function comenca(){ ronda = 0; punts = 0; ratxa = 0; encerts = 0; document.getElementById('punts').textContent = 0;
   document.getElementById('inici').hidden = true; document.getElementById('final').hidden = true; so('clic'); viu = true; novaRonda(); }
 function acaba(){ viu = false; so('win'); avisa('fi');
-  const clau = 'xerinola-' + JOC, millor = Math.max(Number(localStorage.getItem(clau) || 0), punts); localStorage.setItem(clau, millor);
+  const clau = 'catquiz-' + JOC, millor = Math.max(Number(localStorage.getItem(clau) || 0), punts); localStorage.setItem(clau, millor);
   document.getElementById('punts-final').textContent = punts;
   document.getElementById('text-final').textContent = (punts >= millor && punts > 0 ? 'Nou rècord! ' : `El teu rècord és ${millor}. `) + `${encerts} de ${N_RONDES} encertades.`;
   document.getElementById('titol-final').textContent = encerts === N_RONDES ? 'Perfecte!' : encerts >= 7 ? 'Molt bé!' : encerts >= 4 ? 'No està malament' : 'A practicar!';
@@ -242,6 +278,7 @@ function tickRondes(dt){ if (!viu || bloquejat) return; tempsRonda -= dt; if (ba
   if (tempsRonda <= 0) { mostra('Temps!'); fallaTemps(); } }
 
 
+const btnMusica = document.getElementById('btn-musica'); if (btnMusica) { btnMusica.style.opacity = AUDIO.actiu ? 1 : .5; btnMusica.onclick = () => { btnMusica.style.opacity = musicaCommuta() ? 1 : .5; }; }
 function anima(){
   requestAnimationFrame(anima);
   const dt = Math.min(rellotge.getDelta(), .05), t = rellotge.elapsedTime;
